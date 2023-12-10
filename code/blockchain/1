@@ -1,0 +1,9 @@
+{
+    "level": "Manufacturer",
+    "next_level": "level2",
+    "drug": abc,
+    "prev_block": {
+        "hash": "",
+        "filename": ""
+    }
+}

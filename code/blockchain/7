@@ -1,0 +1,21 @@
+{
+    "member_name": "pavan",
+    "email": "pavankumar.dubasi2019@gmail.com",
+    "gender": "male",
+    "location": "india",
+    "employer": "bhima pay",
+    "relationship": "son",
+    "patient_name": "bhimudu",
+    "patient_suffix": "3121",
+    "patient_dob": "2000-12-12",
+    "cause": "death",
+    "Fee_Charged": "70000",
+    "membership_period": "12345",
+    "number_of_claims": "2",
+    "number_of_dependants": "2",
+    "label": "1",
+    "prev_block": {
+        "hash": "5168c369128e9b1e81ad62b0e5e4d826",
+        "filename": "6"
+    }
+}

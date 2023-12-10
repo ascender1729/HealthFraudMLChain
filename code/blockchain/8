@@ -1,0 +1,21 @@
+{
+    "member_name": "dubasi",
+    "email": "pavankumard.pg19.ma@nitp.ac.in",
+    "gender": "male",
+    "location": "Bharat",
+    "employer": "Star Health",
+    "relationship": "Son",
+    "patient_name": "Raghav",
+    "patient_suffix": "2222",
+    "patient_dob": "2003-02-01",
+    "cause": "Accident near the department ",
+    "Fee_Charged": "29192",
+    "membership_period": "12121",
+    "number_of_claims": "4",
+    "number_of_dependants": "3",
+    "label": "1",
+    "prev_block": {
+        "hash": "fd300a42458a1de3f2a08ebbf7dddbc4",
+        "filename": "7"
+    }
+}

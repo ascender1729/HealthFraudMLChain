@@ -1,0 +1,21 @@
+{
+    "member_name": "Sithole",
+    "email": "dinesh897921@gmail.com",
+    "gender": "Gweru",
+    "location": "male",
+    "employer": "Camimbo",
+    "relationship": "Mother",
+    "patient_name": "Sibanda",
+    "patient_suffix": "1234",
+    "patient_dob": "2023-11-08",
+    "cause": "other",
+    "Fee_Charged": "88888",
+    "membership_period": "15412",
+    "number_of_claims": "2",
+    "number_of_dependants": "1",
+    "label": "1",
+    "prev_block": {
+        "hash": "33d5bf0afa24a3ad43f15670d9c3fd26",
+        "filename": "4"
+    }
+}

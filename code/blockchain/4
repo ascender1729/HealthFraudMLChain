@@ -1,0 +1,21 @@
+{
+    "member_name": "Chipi",
+    "email": "ajimmison0@sun.com",
+    "gender": "Kwekwe",
+    "location": "female",
+    "employer": "Vipe",
+    "relationship": "Grandfather",
+    "patient_name": "Mabhena",
+    "patient_suffix": "1234",
+    "patient_dob": "2023-11-09",
+    "cause": "Other",
+    "Fee_Charged": "37982",
+    "membership_period": "15412",
+    "number_of_claims": "2",
+    "number_of_dependants": "1",
+    "label": "1",
+    "prev_block": {
+        "hash": "1158a552e0eedcbb058289351fb52164",
+        "filename": "3"
+    }
+}

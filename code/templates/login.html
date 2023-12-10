@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://source.unsplash.com/s6S8IgEN6-4') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);}
+        h1 {
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            margin-left: 5px;
+        }
+
+        .form-group input {
+            width: 95%;
+            padding: 7px;
+            font-size: 16px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+            margin-left: 5px;
+        }
+
+        .form-group input[type="submit"] {
+            background-color: #4caf50;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .form-group input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <form method="POST" action="/login">
+            <div class="form-group">
+                <label for="username" style="margin-left: 10px;">Username:</label>
+                <input type="text" id="username" name="username" required style="margin-left: 10px;">
+            </div>
+            <div class="form-group">
+                <label for="password" style="margin-left: 10px;">Password:</label>
+                <input type="password" id="password" name="password" required style="margin-left: 10px;">
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Login">
+            </div>
+        </form>
+        <div class="signup-link">
+            Don't have an account? <a href="/signup">Sign up here</a>.
+        </div>
+    </div>
+</body>
+</html>

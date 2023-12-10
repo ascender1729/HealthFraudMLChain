@@ -1,0 +1,21 @@
+{
+    "member_name": "DUBASI",
+    "email": "dpk@gmail.com",
+    "gender": "india",
+    "location": "male",
+    "employer": "bhima pay",
+    "relationship": "father",
+    "patient_name": "ragav",
+    "patient_suffix": "1234",
+    "patient_dob": "2001-12-12",
+    "cause": "Accident",
+    "Fee_Charged": "37982",
+    "membership_period": "15412",
+    "number_of_claims": "2",
+    "number_of_dependants": "1",
+    "label": "1",
+    "prev_block": {
+        "hash": "4aeed3b563dcb7ab33c8ef6d8bc67512",
+        "filename": "5"
+    }
+}

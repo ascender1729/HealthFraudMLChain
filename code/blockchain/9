@@ -1,0 +1,21 @@
+{
+    "member_name": "PAVAN",
+    "email": "dpk@gmail.com",
+    "gender": "male",
+    "location": "INDIA",
+    "employer": "INFOGES",
+    "relationship": "Son",
+    "patient_name": "Raju",
+    "patient_suffix": "3212",
+    "patient_dob": "2002-02-01",
+    "cause": "Other",
+    "Fee_Charged": "20000",
+    "membership_period": "12323",
+    "number_of_claims": "3",
+    "number_of_dependants": "1",
+    "label": "0",
+    "prev_block": {
+        "hash": "79f85b62ae4c763a0352731253bfd21d",
+        "filename": "8"
+    }
+}

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Blockchain</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('https://source.unsplash.com/KCJKsJPe9pQ') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .title {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: rgb(10, 10, 10);
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 3px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+
+    .form-group .input-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .primary-button {
+      background-color: rgb(225, 180, 255);
+      color: black;
+      font-size: 16px;
+      border: none;
+      border-radius: 3px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    .primary-button:hover {
+      background-color: rgb(200, 150, 230);
+    }
+
+    .block {
+      font-size: 20px;
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      color: rgb(32, 1, 23);
+    }
+
+    .blockchain-results {
+      margin-top: 20px;
+    }
+
+    .blockchain-results .op {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .label {
+      font-size: 16px;
+      color: rgb(8, 8, 8);
+    }
+
+    .form-group .login-link {
+      font-size: 16px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .body {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body class="body">
+  <div class="container">
+    <h1 class="title">Remittance of Block-chain</h1>
+    <form action="{{ url_for('index') }}" method="POST">
+      <div class="form-group">
+        <label for="level" class="label">Policy Information</label>
+        <div class="input-group">
+          <input type="text" placeholder="Member Name" name="level" required>
+          <input type="email" placeholder="Email" name="level1" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="level" class="label">General Information</label>
+      </div>
+      <div class="form-group">
+        <label class="label">Applicant</label>
+        <div class="input-group">
+          <select class="sel" name="level3" required>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+          <input type="text" placeholder="location" name="level2" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="level" class="label"></label>
+        <div class="input-group">
+          <input type="text" placeholder="Employer" name="level4" required>
+          <input type="text" placeholder="Relationship" name="level5" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="level" class="label"></label>
+        <div class="input-group">
+          <input type="text" placeholder="Patient Name" name="level6" required>
+          <input type="text" placeholder="Patient Suffix" name="level7" pattern="[0-9]{4}" required>
+          <input type="date" placeholder="DOB" name="level8" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="label">Information of the Person Life Insured</label>
+        <div class="input-group">
+          <input type="text" name="level9" placeholder="cause" required>
+          <input type="text" placeholder="Fee Charged" name="level10" pattern="[0-9]{5}" required>
+          <input type="text" placeholder="Membership Period" name="level11" pattern="[0-9]{5}"  required>
+          <input type="text" placeholder="No. of claims" name="level12" pattern="[0-9]{1}" required>
+          <input type="text" placeholder="No. of dependants" name="level13" pattern="[0-9]{1}"  required>
+          <input type="text" placeholder="label" name="level14" pattern="[0-1]{1}"  required>
+        </div>
+      </div>
+      <button class="primary-button">Submit</button>
+    </form>
+    <div class="blockchain-results">
+      <h3 class="block">Blockchain Results</h3>
+      <form action="{{ url_for('check') }}" method="GET">
+        <button class="primary-button">Check</button>
+      </form>
+      {% for res in checking_results %}
+        <div class="op">Block {{ res['block'] }}: {{ res['result'] }}</div>
+      {% endfor %}
+    </div>
+    <div class="form-group login-link">
+      Login Page <a href="/login">Login here</a>.
+    </div>
+  </div>
+</body>
+</html>
