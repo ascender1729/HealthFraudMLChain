@@ -3,7 +3,7 @@
 | Development Area           | Tools/Technologies   | Description                                                                                   |
 |----------------------------|----------------------|-----------------------------------------------------------------------------------------------|
 | **Frontend Development**   | HTML/CSS             | For structuring and styling web pages, ensuring an intuitive and responsive user interface.   |
-|                            | Jinja2               | A templating engine for Python, facilitating dynamic content rendering within HTML.           |
+|                            | Jinja2               | A templating engine for Python, used for generating HTML pages with dynamic content.         |facilitating dynamic content rendering within HTML.           |
 | **Backend Development**    | Flask                | A lightweight WSGI web framework for serving the web application.                             |
 |                            | Python               | The core programming language, used across backend development and data processing tasks.     |
 | **Machine Learning**       | Pandas               | Essential for data manipulation and analysis, enabling efficient handling of datasets.        |
