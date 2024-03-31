@@ -6,7 +6,8 @@
   </tr>
   <tr>
     <td rowspan="2"><strong>Frontend Development</strong></td>
-    <td>HTML/CSS</td>
+    <td>![HTML/CSS](https://img.shields.io/badge/Frontend-HTML%2FCSS-blue) 
+</td>
     <td>For structuring and styling web pages, ensuring an intuitive and responsive user interface.</td>
   </tr>
   <tr>
