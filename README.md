@@ -76,3 +76,65 @@
 </tr>
 </table>
 
+
+## HealthFraudMLChain Setup Guide
+
+### Installation & Setup
+
+1. **Clone the Repository**:
+   Open PowerShell and navigate to the directory where you want to clone the repository.
+   ```powershell
+   git clone https://github.com/ascender1729/HealthFraudMLChain.git
+   ```
+
+2. **Navigate to the Project Directory**:
+   ```powershell
+   cd .\HealthFraudMLChain\code\
+   ```
+
+3. **Create and Activate the Virtual Environment**:
+   This step is important to ensure that the Python packages installed do not interfere with the packages of other Python projects.
+   ```powershell
+   python -m venv myenv
+   .\myenv\Scripts\Activate.ps1
+   ```
+
+4. **Install Dependencies**:
+   Once the virtual environment is activated, you'll see `(myenv)` before your directory path in the terminal. Now, install the project dependencies.
+   ```powershell
+   pip install -r requirements.txt
+   ```
+
+### Running the Application
+
+1. **Set Flask Environment Variables**:
+   Before running the Flask application, you need to set two environment variables. The `FLASK_APP` variable points to your main application file, and the `FLASK_ENV` sets the environment (development/production).
+   ```powershell
+   $env:FLASK_APP = "main.py"
+   $env:FLASK_ENV = "development"
+   ```
+
+2. **Start the Flask Application**:
+   To run the Flask application, use the `flask run` command. This will start a local server.
+   ```powershell
+   flask run
+   ```
+   You should see output indicating the server has started, similar to this:
+   ```
+   * Serving Flask app 'main.py'
+   * Debug mode: off
+   * Running on http://127.0.0.1:5000
+   ```
+
+3. **Accessing the Application**:
+   Open your web browser and go to `http://127.0.0.1:5000` to view and interact with the Flask application.
+
+### Shutting Down
+
+1. **Deactivate the Virtual Environment**:
+   When you are finished working with your Flask application, you can deactivate the virtual environment to return to your global Python environment.
+   ```powershell
+   deactivate
+   ```
+
+Remember to deactivate your virtual environment (`deactivate`) before closing PowerShell or navigating away from the project directory.
