@@ -1,13 +1,22 @@
 # HealthFraudMLChain
 
+
 ## Overview
-HealthFraudMLChain is a web application designed to enhance healthcare insurance fraud detection and prevention using a machine learning and blockchain-based approach. It integrates advanced technologies to combat health insurance scams, ensuring secure and transparent handling of sensitive information.
+
+HealthFraudMLChain is a pioneering web application designed to combat healthcare insurance fraud through the integration of machine learning and blockchain technologies. It aims to enhance the detection and prevention of fraudulent activities, ensuring the security and integrity of healthcare insurance claims.
 
 ## Features
-- Flask web application for user interaction with the system.
-- Machine learning models for predictive analysis and fraud detection.
-- Blockchain integration for immutable record keeping and enhanced security.
-- User authentication for secure access to the platform.
+
+- **User-Friendly Web Interface**: Built with Flask, the application provides an easy-to-navigate interface for user interactions, including account management and policy oversight.
+
+- **Advanced Fraud Detection**: Utilizes machine learning models to accurately identify and predict fraudulent activities in healthcare claims, significantly improving fraud prevention efforts.
+
+- **Blockchain Integration**: Employs blockchain technology for creating an immutable ledger, ensuring the transparency and verifiability of transactions and enhancing data security.
+
+- **Data Encryption**: Implements ECIES for robust encryption, protecting sensitive information against unauthorized access.
+
+These streamlined features underscore HealthFraudMLChain's commitment to leveraging advanced technologies for safeguarding healthcare insurance processes against fraud.
+
 
 ## Table of Contents
 - [Overview](#overview)
