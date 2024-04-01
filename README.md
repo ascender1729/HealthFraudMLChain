@@ -71,7 +71,7 @@
   <td>Empowers source code management and collaborative development.</td>
 </tr>
 <tr>
-  <td><img src="https://img.shields.io/badge/GitHub-blue?style=for-the-badge" alt="GitHub"></td>
+  <td><img src="https://img.shields.io/badge/-GitHub-222222?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></td>
   <td>Hosts the project repository, providing a platform for version control and collaboration.</td>
 </tr>
 </table>
