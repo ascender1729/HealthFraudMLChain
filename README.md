@@ -29,8 +29,6 @@ These streamlined features underscore HealthFraudMLChain's commitment to leverag
 - [Usage](#usage)
 - [Tools and Technologies](#tools-and-technologies)
   - [Development Tools and Technologies Table](#development-tools-and-technologies-table)
-- [Contributing](#contributing)
-- [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
 
@@ -189,8 +187,7 @@ The application provides several endpoints for interaction:
 
 
 
-## Contributing
-We welcome contributions! Please read `CONTRIBUTING.md` for details on our code of conduct, and the process for submitting pull requests.
+
 
 ## License
 This work is licensed under a [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License](LICENSE.md).
