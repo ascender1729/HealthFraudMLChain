@@ -19,7 +19,7 @@
     <td>A lightweight WSGI web framework for serving the web application.</td>
   </tr>
   <tr>
-    <td><img src="https://img.shields.io/badge/Python-blue?style=for-the-badge" alt="Python"></td>
+    <td><img src="https://img.shields.io/badge/-Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"></td>
     <td>The core programming language, used across backend development and data processing tasks.</td>
 <!-- ... previous rows ... -->
 
