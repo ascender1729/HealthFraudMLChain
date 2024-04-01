@@ -41,7 +41,7 @@
   <td>Utilized for creating immutable data records, enhancing data security and integrity.</td>
 </tr>
 <tr>
-  <td><img src="https://img.shields.io/badge/ECIES-blue?style=for-the-badge" alt="ECIES"></td>
+  <td><img src="https://img.shields.io/badge/-ECIES-4A4A55?style=for-the-badge" alt="ECIES"></td>
   <td>For secure data encryption and decryption, and generating Ethereum-compatible keys.</td>
 </tr>
 
