@@ -67,7 +67,7 @@
 
 <tr>
   <td rowspan="2"><img src="https://img.shields.io/badge/Development_Tools-000?style=for-the-badge" alt="Development Tools"></td>
-  <td><img src="https://img.shields.io/badge/Git-blue?style=for-the-badge" alt="Git"></td>
+  <td><img src="https://img.shields.io/badge/-Git-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git"></td>
   <td>Empowers source code management and collaborative development.</td>
 </tr>
 <tr>
