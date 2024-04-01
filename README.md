@@ -12,14 +12,24 @@ HealthFraudMLChain is a web application designed to enhance healthcare insurance
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#features)
-- [HealthFraudMLChain Setup Guide](#HealthFraudMLChain-Setup-Guide)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
+- [Table of Contents](#table-of-contents)
+- [HealthFraudMLChain Setup Guide](#healthfraudmlchain-setup-guide)
+  - [Installation & Setup](#installation--setup)
   - [Running the Application](#running-the-application)
+  - [Shutting Down](#shutting-down)
 - [Usage](#usage)
+- [Tools and Technologies](#tools-and-technologies)
+  - [Frontend Development](#frontend-development)
+  - [Backend Development](#backend-development)
+  - [Machine Learning](#machine-learning)
+  - [Blockchain Integration](#blockchain-integration)
+  - [Cryptography and Security](#cryptography-and-security)
+  - [Additional Tools and Libraries](#additional-tools-and-libraries)
+  - [Development Tools](#development-tools)
 - [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
+
 
 
 <table>
