@@ -15,17 +15,15 @@
   </tr>
   <tr>
     <td rowspan="2"><img src="https://img.shields.io/badge/Backend_Development-000?style=for-the-badge" alt="Backend Development"></td>
-    <td><img src="https://img.shields.io/badge/Flask-lightgrey?style=for-the-badge" alt="Flask"></td>
+    <td><img src="https://img.shields.io/badge/-Flask-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask"></td>
     <td>A lightweight WSGI web framework for serving the web application.</td>
   </tr>
   <tr>
     <td><img src="https://img.shields.io/badge/-Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"></td>
     <td>The core programming language, used across backend development and data processing tasks.</td>
-<!-- ... previous rows ... -->
-
 <tr>
   <td rowspan="3"><img src="https://img.shields.io/badge/Machine_Learning-000?style=for-the-badge" alt="Machine Learning"></td>
-  <td><img src="https://img.shields.io/badge/Pandas-blue?style=for-the-badge" alt="Pandas"></td>
+  <td><img src="https://img.shields.io/badge/-Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white" alt="Pandas"></td>
   <td>Essential for data manipulation and analysis, enabling efficient handling of datasets.</td>
 </tr>
 <tr>
