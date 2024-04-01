@@ -27,11 +27,11 @@
   <td>Essential for data manipulation and analysis, enabling efficient handling of datasets.</td>
 </tr>
 <tr>
-  <td><img src="https://img.shields.io/badge/Scikit_learn-blue?style=for-the-badge" alt="Scikit-learn"></td>
+  <td><img src="https://img.shields.io/badge/-Scikit_Image-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white"></td>
   <td>Used for developing predictive models to identify fraudulent activities.</td>
 </tr>
 <tr>
-  <td><img src="https://img.shields.io/badge/NumPy-blue?style=for-the-badge" alt="NumPy"></td>
+  <td><img src="https://img.shields.io/badge/-NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white" alt="NumPy"></td>
   <td>Supports high-level mathematical functions and multi-dimensional arrays.</td>
 </tr>
 
