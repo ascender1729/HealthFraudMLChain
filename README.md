@@ -193,7 +193,8 @@ The application provides several endpoints for interaction:
 We welcome contributions! Please read `CONTRIBUTING.md` for details on our code of conduct, and the process for submitting pull requests.
 
 ## License
-This project is licensed under the [LICENSE] - see the LICENSE.md file for details.
+This work is licensed under a [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License](LICENSE.md).
+
 
 ## Acknowledgments
 - Dr. Rajesh Kumar Sinha for guidance and support.
