@@ -21,6 +21,60 @@
   <tr>
     <td><img src="https://img.shields.io/badge/Python-blue?style=for-the-badge" alt="Python"></td>
     <td>The core programming language, used across backend development and data processing tasks.</td>
-  </tr>
-  <!-- ... rest of the table rows ... -->
+<!-- ... previous rows ... -->
+
+<tr>
+  <td rowspan="3"><img src="https://img.shields.io/badge/Machine_Learning-000?style=for-the-badge" alt="Machine Learning"></td>
+  <td><img src="https://img.shields.io/badge/Pandas-blue?style=for-the-badge" alt="Pandas"></td>
+  <td>Essential for data manipulation and analysis, enabling efficient handling of datasets.</td>
+</tr>
+<tr>
+  <td><img src="https://img.shields.io/badge/Scikit_learn-blue?style=for-the-badge" alt="Scikit-learn"></td>
+  <td>Used for developing predictive models to identify fraudulent activities.</td>
+</tr>
+<tr>
+  <td><img src="https://img.shields.io/badge/NumPy-blue?style=for-the-badge" alt="NumPy"></td>
+  <td>Supports high-level mathematical functions and multi-dimensional arrays.</td>
+</tr>
+
+<tr>
+  <td rowspan="2"><img src="https://img.shields.io/badge/Blockchain_Integration-000?style=for-the-badge" alt="Blockchain Integration"></td>
+  <td><img src="https://img.shields.io/badge/Blockchain_Technology-blue?style=for-the-badge" alt="Blockchain Technology"></td>
+  <td>Utilized for creating immutable data records, enhancing data security and integrity.</td>
+</tr>
+<tr>
+  <td><img src="https://img.shields.io/badge/ECIES-blue?style=for-the-badge" alt="ECIES"></td>
+  <td>For secure data encryption and decryption, and generating Ethereum-compatible keys.</td>
+</tr>
+
+<tr>
+  <td rowspan="2"><img src="https://img.shields.io/badge/Cryptography_and_Security-000?style=for-the-badge" alt="Cryptography and Security"></td>
+  <td><img src="https://img.shields.io/badge/Hashlib-blue?style=for-the-badge" alt="Hashlib"></td>
+  <td>Implements secure hash and message digest algorithms, vital for data integrity checks.</td>
+</tr>
+<tr>
+  <td><img src="https://img.shields.io/badge/ECIES-blue?style=for-the-badge" alt="ECIES"></td>
+  <td>Enhances data security through Elliptic Curve Cryptography.</td>
+</tr>
+
+<tr>
+  <td rowspan="2"><img src="https://img.shields.io/badge/Additional_Tools_and_Libraries-000?style=for-the-badge" alt="Additional Tools and Libraries"></td>
+  <td><img src="https://img.shields.io/badge/CSV_JSON-blue?style=for-the-badge" alt="CSV & JSON"></td>
+  <td>For handling data in CSV and JSON formats.</td>
+</tr>
+<tr>
+  <td><img src="https://img.shields.io/badge/OS_Warnings-blue?style=for-the-badge" alt="OS & Warnings"></td>
+  <td>For performing operating system level operations and managing warnings respectively.</td>
+</tr>
+
+<tr>
+  <td rowspan="2"><img src="https://img.shields.io/badge/Development_Tools-000?style=for-the-badge" alt="Development Tools"></td>
+  <td><img src="https://img.shields.io/badge/Git-blue?style=for-the-badge" alt="Git"></td>
+  <td>Empowers source code management and collaborative development.</td>
+</tr>
+<tr>
+  <td><img src="https://img.shields.io/badge/GitHub-blue?style=for-the-badge" alt="GitHub"></td>
+  <td>Hosts the project repository, providing a platform for version control and collaboration.</td>
+</tr>
 </table>
+
