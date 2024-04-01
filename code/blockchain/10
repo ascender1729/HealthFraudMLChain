@@ -1,0 +1,21 @@
+{
+    "member_name": "sds",
+    "email": "s@gmail.com",
+    "gender": "male",
+    "location": "india",
+    "employer": "dd",
+    "relationship": "mom",
+    "patient_name": "revi",
+    "patient_suffix": "1211",
+    "patient_dob": "2020-11-11",
+    "cause": "death",
+    "Fee_Charged": "10000",
+    "membership_period": "12121",
+    "number_of_claims": "1",
+    "number_of_dependants": "2",
+    "label": "1",
+    "prev_block": {
+        "hash": "9b261e2dd93e304251dba2cee6999ac4",
+        "filename": "9"
+    }
+}

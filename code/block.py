@@ -53,8 +53,8 @@ def write_block(policy, policy1, policy2, policy3, policy4, policy5, policy6, po
     data = {
         "member_name": policy,
         "email": policy1,
-        "gender": policy3,
-        "location": policy2,
+        "gender": policy2,
+        "location": policy3,
         "employer": policy4,
         "relationship": policy5,
         "patient_name": policy6,
