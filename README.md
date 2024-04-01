@@ -1,3 +1,27 @@
+# HealthFraudMLChain
+
+## Overview
+HealthFraudMLChain is a web application designed to enhance healthcare insurance fraud detection and prevention using a machine learning and blockchain-based approach. It integrates advanced technologies to combat health insurance scams, ensuring secure and transparent handling of sensitive information.
+
+## Features
+- Flask web application for user interaction with the system.
+- Machine learning models for predictive analysis and fraud detection.
+- Blockchain integration for immutable record keeping and enhanced security.
+- User authentication for secure access to the platform.
+
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [HealthFraudMLChain Setup Guide](#HealthFraudMLChain-Setup-Guide)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running the Application](#running-the-application)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+
+
 <table>
   <tr>
     <th>Development Area</th>
@@ -138,3 +162,22 @@
    ```
 
 Remember to deactivate your virtual environment (`deactivate`) before closing PowerShell or navigating away from the project directory.
+
+
+## Usage
+The application provides several endpoints for interaction:
+- `/login`: User login page.
+- `/signup`: User signup page.
+- `/index`: Main interface for entering and managing policy information.
+- Additional endpoints for blockchain integrity checks and other operations.
+
+## Contributing
+We welcome contributions! Please read `CONTRIBUTING.md` for details on our code of conduct, and the process for submitting pull requests.
+
+## License
+This project is licensed under the [LICENSE] - see the LICENSE.md file for details.
+
+## Acknowledgments
+- Dr. Rajesh Kumar Sinha for guidance and support.
+- National Institute of Technology Patna for providing the platform for research.
+
