@@ -202,7 +202,7 @@ This work is licensed under a [Creative Commons Attribution-NonCommercial-NoDeri
 
 ## 📖 Citation
 
-This project is based on the B.Tech thesis titled:
+This project is based on the Integrated M.Sc. Mathematics Project titled:
 
 **"Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach"**
 
@@ -217,17 +217,17 @@ If you use this project in your research or work, please cite it as:
   title        = {Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach},
   school       = {National Institute of Technology Patna},
   year         = {2024},
-  type         = {B.Tech Thesis},
+  type         = {Integrated M.Sc. Mathematics Project},
   advisor      = {Dr. Rajesh Kumar Sinha},
   url          = {https://github.com/ascender1729/HealthFraudMLChain}
 }
 ```
 
 ### APA Format
-Dubasi, P. K. (2024). *Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach* [B.Tech thesis, National Institute of Technology Patna]. GitHub. https://github.com/ascender1729/HealthFraudMLChain
+Dubasi, P. K. (2024). *Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach* [Integrated M.Sc. Mathematics Project, National Institute of Technology Patna]. GitHub. https://github.com/ascender1729/HealthFraudMLChain
 
 ### IEEE Format
-P. K. Dubasi, "Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach," B.Tech thesis, Dept. of Computer Science, National Institute of Technology Patna, India, 2024. [Online]. Available: https://github.com/ascender1729/HealthFraudMLChain
+P. K. Dubasi, "Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach," Integrated M.Sc. Mathematics Project, Dept. of Computer Science, National Institute of Technology Patna, India, 2024. [Online]. Available: https://github.com/ascender1729/HealthFraudMLChain
 
 ---
 
