@@ -197,3 +197,47 @@ This work is licensed under a [Creative Commons Attribution-NonCommercial-NoDeri
 - Dr. Rajesh Kumar Sinha for guidance and support.
 - National Institute of Technology Patna for providing the platform for research.
 
+
+---
+
+## 📖 Citation
+
+This project is based on the B.Tech thesis titled:
+
+**"Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach"**
+
+*Awarded Best Final Year Project at National Institute of Technology Patna*
+
+If you use this project in your research or work, please cite it as:
+
+### BibTeX
+```bibtex
+@thesis{dubasi2024_healthfraudmlchain,
+  author       = {Dubasi, Pavan Kumar},
+  title        = {Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach},
+  school       = {National Institute of Technology Patna},
+  year         = {2024},
+  type         = {B.Tech Thesis},
+  advisor      = {Dr. Rajesh Kumar Sinha},
+  url          = {https://github.com/ascender1729/HealthFraudMLChain}
+}
+```
+
+### APA Format
+Dubasi, P. K. (2024). *Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach* [B.Tech thesis, National Institute of Technology Patna]. GitHub. https://github.com/ascender1729/HealthFraudMLChain
+
+### IEEE Format
+P. K. Dubasi, "Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach," B.Tech thesis, Dept. of Computer Science, National Institute of Technology Patna, India, 2024. [Online]. Available: https://github.com/ascender1729/HealthFraudMLChain
+
+---
+
+## 👤 Author
+
+**Pavan Kumar Dubasi**  
+Principal AI Consultant | VibeTensor
+
+- 🌐 Website: [dubasipavankumar.com](https://dubasipavankumar.com)
+- 💼 LinkedIn: [in/im-pavankumar](https://linkedin.com/in/im-pavankumar)
+- 🐦 Twitter: [@the_complex_one](https://twitter.com/the_complex_one)
+- 📧 Email: pavan.dubasi2024@gmail.com
+- 🆔 ORCID: [0009-0006-1060-4598](https://orcid.org/0009-0006-1060-4598)
