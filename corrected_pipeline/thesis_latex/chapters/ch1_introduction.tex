@@ -128,8 +128,8 @@ Blockchain technology complements ML-based detection by providing an immutable, 
 
 % Row 4 (right to left): Decision Layer
 \node[layer] at (-3.8, -5.4) {Decision Layer};
-\node[ml, below=of train] (pred) {XGBoost Prediction};
-\node[outp, left=of pred] (thresh) {Fixed Threshold $t{=}0.5$};
+\node[ml, below=of train] (pred) {Weighted Ensemble Prediction};
+\node[outp, left=of pred] (thresh) {Fixed Threshold $t{=}0.444$};
 
 % Row 5 (left to right): Security + Explainability Layer
 \node[layer] at (-3.8, -7.4) {Security Layer};
