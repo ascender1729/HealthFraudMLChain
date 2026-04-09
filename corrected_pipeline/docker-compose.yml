@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  fraud-detector:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./results:/app/results
+      - ./provider_features.csv:/app/provider_features.csv
+    environment:
+      - RESULTS_DIR=/app/results
+    restart: unless-stopped

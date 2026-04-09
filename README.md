@@ -1,243 +1,135 @@
 # HealthFraudMLChain
 
+**Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach**
+
+M.Sc. Dissertation, Department of Mathematics, National Institute of Technology Patna, 2024
+
+**Live Demo:** [healthcare-fraud-detection.pages.dev](https://healthcare-fraud-detection.pages.dev/)
 
 ## Overview
 
-HealthFraudMLChain is a pioneering web application designed to combat healthcare insurance fraud through the integration of machine learning and blockchain technologies. It aims to enhance the detection and prevention of fraudulent activities, ensuring the security and integrity of healthcare insurance claims.
+This repository contains the complete research pipeline for healthcare insurance fraud detection using an ensemble of Optuna-tuned machine learning classifiers with blockchain-secured audit trails and ECIES encryption. The system aggregates 558,211 Medicare claims into 5,410 provider-level records with 190 engineered features, achieving F1 = 0.7345 with zero data leakage under 10-fold stratified cross-validation.
+
+## Key Results
+
+| Metric | Value | 95% Bootstrap CI |
+|--------|-------|-------------------|
+| F1 Score | 0.7345 | [0.7118, 0.7715] |
+| Precision | 73.7% | [69.8%, 77.5%] |
+| Recall | 74.7% | [70.9%, 78.4%] |
+| MCC | 0.7151 | [0.6818, 0.7474] |
+| ROC-AUC | 0.9587 | [0.9477, 0.9686] |
+| PR-AUC | 0.8114 | [0.7801, 0.8406] |
+
+Weighted ensemble: LightGBM (39.6%), CatBoost (32.0%), XGBoost (28.2%) at fixed threshold t = 0.444.
+
+**Statistical significance:** Friedman test p = 0.00089; all pairwise Wilcoxon comparisons significant after Holm correction.
 
 ## Features
 
-- **User-Friendly Web Interface**: Built with Flask, the application provides an easy-to-navigate interface for user interactions, including account management and policy oversight.
+- **ML Pipeline:** Five gradient-boosted classifiers (XGBoost, LightGBM, CatBoost, GradientBoosting, RandomForest) with Optuna TPE hyperparameter optimization (60 trials per model)
+- **Leakage-Free Evaluation:** All feature engineering (z-scores, percentiles, IsolationForest, physician statistics) computed strictly within each CV fold
+- **Explainability:** Dual SHAP (global) + LIME (local) interpretation identifying deductible patterns, reimbursement anomalies, and claim duration signals as top fraud indicators
+- **Blockchain Audit:** Custom SHA-256 blockchain with Merkle tree integrity verification, PoW (difficulty 2), and SQLite persistence (110 blocks, 5,411 records)
+- **ECIES Encryption:** secp256k1 + HKDF-SHA256 + AES-256-GCM field-level encryption for provider PII protection
+- **Statistical Rigor:** Friedman + Wilcoxon (Holm-corrected) non-parametric tests, Cohen's d effect sizes, 2000-iteration bootstrap confidence intervals
+- **Web Prototype:** Interactive Next.js static site deployed on Cloudflare Pages with browser-side ECIES demo
 
-- **Advanced Fraud Detection**: Utilizes machine learning models to accurately identify and predict fraudulent activities in healthcare claims, significantly improving fraud prevention efforts.
+## Repository Structure
 
-- **Blockchain Integration**: Employs blockchain technology for creating an immutable ledger, ensuring the transparency and verifiability of transactions and enhancing data security.
+```
+corrected_pipeline/
+  01_preprocess.py              # Data preprocessing and feature engineering
+  02_train_evaluate.py          # Initial model training
+  04_optuna_tuning.py           # Optuna hyperparameter optimization
+  15_definitive_final.py        # Definitive leakage-free evaluation (main script)
+  16_regenerate_all_figures.py  # Figure generation
+  17_multi_node_demo.py         # Multi-node blockchain consensus demo
+  export_static_data.py         # Export data for web frontend
+  blockchain/
+    chain.py                    # SHA-256 blockchain with Merkle trees
+    ecies_cipher.py             # ECIES encryption (secp256k1 + AES-256-GCM)
+  results/
+    definitive_final_results.json  # All model metrics and statistical tests
+    figures/                       # 15 research figures (PNG + PDF)
+  thesis_latex/
+    main.tex                    # Complete thesis LaTeX source
+    chapters/                   # Ch1-Ch5 chapter files
+Dataset/                        # Kaggle rohitrox Medicare claims data
+thesis.pdf                      # Compiled thesis PDF
+```
 
-- **Data Encryption**: Implements ECIES for robust encryption, protecting sensitive information against unauthorized access.
+## Quick Start
 
-These streamlined features underscore HealthFraudMLChain's commitment to leveraging advanced technologies for safeguarding healthcare insurance processes against fraud.
+```bash
+# Clone
+git clone https://github.com/ascender1729/HealthFraudMLChain.git
+cd HealthFraudMLChain/corrected_pipeline
 
+# Install dependencies
+pip install -r requirements.txt
 
-## Table of Contents
-- [Overview](#overview)
-- [Features](#features)
-- [Table of Contents](#table-of-contents)
-- [HealthFraudMLChain Setup Guide](#healthfraudmlchain-setup-guide)
-  - [Installation & Setup](#installation--setup)
-  - [Running the Application](#running-the-application)
-  - [Shutting Down](#shutting-down)
-- [Usage](#usage)
-- [Tools and Technologies](#tools-and-technologies)
-  - [Development Tools and Technologies Table](#development-tools-and-technologies-table)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
+# Run the definitive evaluation (requires Dataset/ with Medicare CSVs)
+python 15_definitive_final.py
 
+# Run blockchain demo
+python 06_blockchain_demo.py
 
+# Multi-node consensus validation
+python 17_multi_node_demo.py
+```
 
-## HealthFraudMLChain Setup Guide
+## Web Prototype
 
-### Installation & Setup
+The interactive demo is deployed at [healthcare-fraud-detection.pages.dev](https://healthcare-fraud-detection.pages.dev/) with:
 
-1. **Clone the Repository**:
-   Open PowerShell and navigate to the directory where you want to clone the repository.
-   ```powershell
-   git clone https://github.com/ascender1729/HealthFraudMLChain.git
-   ```
-
-2. **Navigate to the Project Directory**:
-   ```powershell
-   cd .\HealthFraudMLChain\code\
-   ```
-
-3. **Create and Activate the Virtual Environment**:
-   This step is important to ensure that the Python packages installed do not interfere with the packages of other Python projects.
-   ```powershell
-   python -m venv myenv
-   .\myenv\Scripts\Activate.ps1
-   ```
-
-4. **Install Dependencies**:
-   Once the virtual environment is activated, you'll see `(myenv)` before your directory path in the terminal. Now, install the project dependencies.
-   ```powershell
-   pip install -r requirements.txt
-   ```
-
-### Running the Application
-
-1. **Set Flask Environment Variables**:
-   Before running the Flask application, you need to set two environment variables. The `FLASK_APP` variable points to your main application file, and the `FLASK_ENV` sets the environment (development/production).
-   ```powershell
-   $env:FLASK_APP = "main.py"
-   $env:FLASK_ENV = "development"
-   ```
-
-2. **Start the Flask Application**:
-   To run the Flask application, use the `flask run` command. This will start a local server.
-   ```powershell
-   flask run
-   ```
-   You should see output indicating the server has started, similar to this:
-   ```
-   * Serving Flask app 'main.py'
-   * Debug mode: off
-   * Running on http://127.0.0.1:5000
-   ```
-
-3. **Accessing the Application**:
-   Open your web browser and go to `http://127.0.0.1:5000` to view and interact with the Flask application.
-
-### Shutting Down
-
-1. **Deactivate the Virtual Environment**:
-   When you are finished working with your Flask application, you can deactivate the virtual environment to return to your global Python environment.
-   ```powershell
-   deactivate
-   ```
-
-Remember to deactivate your virtual environment (`deactivate`) before closing PowerShell or navigating away from the project directory.
-
-
-## Usage
-The application provides several endpoints for interaction:
-- `/login`: User login page.
-- `/signup`: User signup page.
-- `/index`: Main interface for entering and managing policy information.
-- Additional endpoints for blockchain integrity checks and other operations.
+- **Provider Analysis** - Look up any provider's fraud risk with SHAP/LIME explanations
+- **Research Results** - All 15 figures, statistical tests, bootstrap CIs
+- **Blockchain Explorer** - Inspect the 110-block audit chain
+- **ECIES Demo** - Live browser-side encrypt/decrypt using Web Crypto API
 
 ## Tools and Technologies
 
-### Development Tools and Technologies Table
-<table>
-  <tr>
-    <th>Development Area</th>
-    <th>Tools/Technologies</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td rowspan="2"><img src="https://img.shields.io/badge/Frontend_Development-000?style=for-the-badge" alt="Frontend Development"></td>
-    <td><img src="https://img.shields.io/badge/HTML%2FCSS-blue?style=for-the-badge" alt="HTML/CSS"></td>
-    <td>For structuring and styling web pages, ensuring an intuitive and responsive user interface.</td>
-  </tr>
-  <tr>
-    <td><img src="https://img.shields.io/badge/Jinja2-blue?style=for-the-badge" alt="Jinja2"></td>
-    <td>A templating engine for Python, used for generating HTML pages with dynamic content.</td>
-  </tr>
-  <tr>
-    <td rowspan="2"><img src="https://img.shields.io/badge/Backend_Development-000?style=for-the-badge" alt="Backend Development"></td>
-    <td><img src="https://img.shields.io/badge/-Flask-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask"></td>
-    <td>A lightweight WSGI web framework for serving the web application.</td>
-  </tr>
-  <tr>
-    <td><img src="https://img.shields.io/badge/-Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"></td>
-    <td>The core programming language, used across backend development and data processing tasks.</td>
-<tr>
-  <td rowspan="3"><img src="https://img.shields.io/badge/Machine_Learning-000?style=for-the-badge" alt="Machine Learning"></td>
-  <td><img src="https://img.shields.io/badge/-Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white" alt="Pandas"></td>
-  <td>Essential for data manipulation and analysis, enabling efficient handling of datasets.</td>
-</tr>
-<tr>
-  <td><img src="https://img.shields.io/badge/-Scikit_Image-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white"></td>
-  <td>Used for developing predictive models to identify fraudulent activities.</td>
-</tr>
-<tr>
-  <td><img src="https://img.shields.io/badge/-NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white" alt="NumPy"></td>
-  <td>Supports high-level mathematical functions and multi-dimensional arrays.</td>
-</tr>
-
-<tr>
-  <td rowspan="2"><img src="https://img.shields.io/badge/Blockchain_Integration-000?style=for-the-badge" alt="Blockchain Integration"></td>
-  <td><img src="https://img.shields.io/badge/Blockchain_Technology-blue?style=for-the-badge" alt="Blockchain Technology"></td>
-  <td>Utilized for creating immutable data records, enhancing data security and integrity.</td>
-</tr>
-<tr>
-  <td><img src="https://img.shields.io/badge/-ECIES-4A4A55?style=for-the-badge" alt="ECIES"></td>
-  <td>For secure data encryption and decryption, and generating Ethereum-compatible keys.</td>
-</tr>
-
-<tr>
-  <td rowspan="2"><img src="https://img.shields.io/badge/Cryptography_and_Security-000?style=for-the-badge" alt="Cryptography and Security"></td>
-  <td><img src="https://img.shields.io/badge/Hashlib-blue?style=for-the-badge" alt="Hashlib"></td>
-  <td>Implements secure hash and message digest algorithms, vital for data integrity checks.</td>
-</tr>
-<tr>
-  <td><img src="https://img.shields.io/badge/ECIES-blue?style=for-the-badge" alt="ECIES"></td>
-  <td>Enhances data security through Elliptic Curve Cryptography.</td>
-</tr>
-
-<tr>
-  <td rowspan="2"><img src="https://img.shields.io/badge/Additional_Tools_and_Libraries-000?style=for-the-badge" alt="Additional Tools and Libraries"></td>
-  <td><img src="https://img.shields.io/badge/CSV_JSON-blue?style=for-the-badge" alt="CSV & JSON"></td>
-  <td>For handling data in CSV and JSON formats.</td>
-</tr>
-<tr>
-  <td><img src="https://img.shields.io/badge/OS_Warnings-blue?style=for-the-badge" alt="OS & Warnings"></td>
-  <td>For performing operating system level operations and managing warnings respectively.</td>
-</tr>
-
-<tr>
-  <td rowspan="2"><img src="https://img.shields.io/badge/Development_Tools-000?style=for-the-badge" alt="Development Tools"></td>
-  <td><img src="https://img.shields.io/badge/-Git-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git"></td>
-  <td>Empowers source code management and collaborative development.</td>
-</tr>
-<tr>
-  <td><img src="https://img.shields.io/badge/-GitHub-222222?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></td>
-  <td>Hosts the project repository, providing a platform for version control and collaboration.</td>
-</tr>
-</table>
-
-
-
-
+| Category | Technologies |
+|----------|-------------|
+| ML Pipeline | Python, scikit-learn, XGBoost, LightGBM, CatBoost, Optuna, SHAP, LIME |
+| Blockchain | SHA-256, Merkle Trees, Proof-of-Work, SQLite |
+| Encryption | ECIES (secp256k1 + HKDF-SHA256 + AES-256-GCM) |
+| Statistics | Friedman test, Wilcoxon signed-rank, Holm correction, Bootstrap CI |
+| Web | Next.js 14, TypeScript, Tailwind CSS, Magic UI, Cloudflare Pages |
+| Data | Kaggle rohitrox Medicare claims (558K claims, 5,410 providers) |
 
 ## License
+
 This work is licensed under a [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License](LICENSE.md).
 
-
 ## Acknowledgments
-- Dr. Rajesh Kumar Sinha for guidance and support.
-- National Institute of Technology Patna for providing the platform for research.
 
+- Dr. Rajesh Kumar Sinha for guidance and supervision
+- National Institute of Technology Patna for research facilities
 
 ---
 
-## 📖 Citation
+## Citation
 
-This project is based on the Integrated M.Sc. Mathematics Project titled:
+If you use this project in your research, please cite:
 
-**"Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach"**
-
-*Awarded Best Final Year Project at National Institute of Technology Patna*
-
-If you use this project in your research or work, please cite it as:
-
-### BibTeX
 ```bibtex
 @thesis{dubasi2024_healthfraudmlchain,
-  author       = {Dubasi, Pavan Kumar},
-  title        = {Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach},
-  school       = {National Institute of Technology Patna},
-  year         = {2024},
-  type         = {Integrated M.Sc. Mathematics Project},
-  advisor      = {Dr. Rajesh Kumar Sinha},
-  url          = {https://github.com/ascender1729/HealthFraudMLChain}
+  author  = {Dubasi, Pavan Kumar},
+  title   = {Enhancing Healthcare Insurance Fraud Detection and Prevention
+             with a Machine Learning and Blockchain-Based Approach},
+  school  = {National Institute of Technology Patna},
+  year    = {2024},
+  type    = {Integrated M.Sc. Mathematics Dissertation},
+  advisor = {Dr. Rajesh Kumar Sinha},
+  url     = {https://github.com/ascender1729/HealthFraudMLChain}
 }
 ```
 
-### APA Format
-Dubasi, P. K. (2024). *Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach* [Integrated M.Sc. Mathematics Project, National Institute of Technology Patna]. GitHub. https://github.com/ascender1729/HealthFraudMLChain
+## Author
 
-### IEEE Format
-P. K. Dubasi, "Enhancing Healthcare Insurance Fraud Detection and Prevention with a Machine Learning and Blockchain-Based Approach," Integrated M.Sc. Mathematics Project, Dept. of Computer Science, National Institute of Technology Patna, India, 2024. [Online]. Available: https://github.com/ascender1729/HealthFraudMLChain
-
----
-
-## 👤 Author
-
-**Pavan Kumar Dubasi**  
-Principal AI Consultant | VibeTensor
-
-- 🌐 Website: [dubasipavankumar.com](https://dubasipavankumar.com)
-- 💼 LinkedIn: [in/im-pavankumar](https://linkedin.com/in/im-pavankumar)
-- 🐦 Twitter: [@the_complex_one](https://twitter.com/the_complex_one)
-- 📧 Email: pavan.dubasi2024@gmail.com
-- 🆔 ORCID: [0009-0006-1060-4598](https://orcid.org/0009-0006-1060-4598)
+**Dubasi Pavan Kumar**
+- Website: [dubasipavankumar.com](https://dubasipavankumar.com)
+- LinkedIn: [in/im-pavankumar](https://linkedin.com/in/im-pavankumar)
+- ORCID: [0009-0006-1060-4598](https://orcid.org/0009-0006-1060-4598)

@@ -1,0 +1,30 @@
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Types of Health Insurance Fraud}}{3}{figure.caption.1}%
+\contentsline {figure}{\numberline {1.2}{\ignorespaces High-level architecture of the proposed ML and blockchain-based healthcare fraud detection pipeline. The snake layout illustrates the sequential data flow through six functional layers: data ingestion, feature engineering, model training, decision making, cryptographic security, and explainability output.}}{6}{figure.caption.2}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces End-to-end eight-step pipeline for ML-based healthcare fraud detection with ECIES encryption and SHA-256 blockchain audit trail. The snake layout shows the sequential flow through data ingestion and encryption (green), blockchain storage (red), preprocessing (blue), model training and tuning (orange), and evaluation (yellow) stages.}}{43}{figure.caption.4}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Model comparison: F1-scores across all model configurations.}}{50}{figure.caption.7}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Confusion matrix for the weighted ensemble at fixed threshold $t = 0.444$.}}{50}{figure.caption.8}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Pairwise Wilcoxon signed-rank test results with Holm-Bonferroni correction. Green bars indicate statistically significant differences ($p < 0.05$).}}{51}{figure.caption.9}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Threshold sensitivity curve for the weighted ensemble: F1, Precision, and Recall as a function of decision threshold. The vertical dashed line marks the fixed threshold at $t = 0.444$.}}{52}{figure.caption.11}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Bootstrap 95\% confidence intervals for the weighted ensemble (2,000 iterations, fixed threshold $t=0.444$).}}{53}{figure.caption.13}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Precision-recall curve for the weighted ensemble (PR-AUC = 0.8114). The operating point at fixed threshold $t = 0.444$ achieves precision = 0.737 and recall = 0.747. The baseline precision (dashed) corresponds to the fraud prevalence of 9.4\%.}}{54}{figure.caption.14}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces SMOTE-ENN ablation: F1-score comparison with and without synthetic oversampling for three gradient-boosted models. Delta percentages indicate the performance penalty introduced by SMOTE-ENN.}}{55}{figure.caption.16}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces SHAP beeswarm plot (XGBoost): distribution of SHAP values for the top 20 features across all test-set providers. Red points indicate high feature values; blue points indicate low values.}}{56}{figure.caption.17}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces SHAP global feature importance (XGBoost): mean absolute SHAP values ranked in descending order.}}{57}{figure.caption.18}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces SHAP dependence plots for the top-4 features (XGBoost). Colour represents the value of the strongest interaction feature identified by SHAP.}}{58}{figure.caption.19}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Permutation feature importance (XGBoost): mean decrease in F1 when each feature is randomly permuted, with error bars over 10 repetitions.}}{59}{figure.caption.20}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces SHAP waterfall plot - True Positive case (XGBoost). The model correctly predicts fraud; positive SHAP values push the prediction above the decision threshold.}}{60}{figure.caption.21}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces SHAP waterfall plot - False Positive case (XGBoost). The model incorrectly predicts fraud for a legitimate provider, revealing which features are responsible for the erroneous signal.}}{61}{figure.caption.22}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces SHAP waterfall plot - False Negative case (XGBoost). The model misses an actual fraudulent provider; negative SHAP contributions suppress the prediction below the decision threshold.}}{62}{figure.caption.23}%
+\contentsline {figure}{\numberline {4.15}{\ignorespaces LIME local explanation - True Positive case (XGBoost). Orange bars indicate features supporting the fraud prediction; blue bars indicate features opposing it.}}{63}{figure.caption.24}%
+\contentsline {figure}{\numberline {4.16}{\ignorespaces LIME local explanation - False Positive case (XGBoost). The linear approximation reveals which feature values drove the erroneous fraud classification.}}{64}{figure.caption.25}%
+\contentsline {figure}{\numberline {4.17}{\ignorespaces LIME local explanation - False Negative case (XGBoost). Features with negative LIME weights suppress the fraud score, explaining why the model misses this fraudulent provider.}}{64}{figure.caption.26}%
+\contentsline {figure}{\numberline {4.18}{\ignorespaces Feature selection ablation: F1-score as a function of the number of top-K features selected by permutation importance. The full 190-feature set achieves the best performance.}}{65}{figure.caption.28}%
+\contentsline {figure}{\numberline {4.19}{\ignorespaces Learning curves for XGBoost: training F1 and cross-validation F1 as a function of training-set size. The plateau in validation F1 and the gap between training and validation curves indicate the degree of overfitting.}}{66}{figure.caption.29}%
+\contentsline {figure}{\numberline {4.20}{\ignorespaces Probability calibration curve for XGBoost (reliability diagram): mean predicted probability versus fraction of positives in each probability bin. A perfectly calibrated model lies on the diagonal. The histogram shows the distribution of predicted probabilities.}}{67}{figure.caption.30}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Comparison with published results on the rohitrox dataset. Red bars indicate published results; green indicates this work.}}{74}{figure.caption.31}%
+\addvspace {10\p@ }

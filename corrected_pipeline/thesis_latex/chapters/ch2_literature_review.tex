@@ -1,0 +1,196 @@
+\chapter{Literature Review}
+
+\section{Overview}
+
+Healthcare insurance fraud represents one of the most persistent and financially devastating challenges facing modern healthcare systems worldwide. The National Health Care Anti-Fraud Association estimates that fraudulent billing, upcoding, and phantom services collectively drain billions of dollars annually from public and private health insurance programmes, with losses in the United States alone accounting for approximately 3 to 10 percent of total healthcare expenditure \cite{nhcaa2021}. These losses are not merely financial; they divert resources from legitimate patient care, inflate premiums, and erode public trust in healthcare institutions. The problem is compounded by the sheer scale and complexity of healthcare billing ecosystems, where millions of claims are processed daily across thousands of providers, making manual auditing both impractical and insufficient as a primary control mechanism.
+
+The convergence of machine learning and blockchain technology has emerged as a particularly promising strategy to address the limitations of conventional fraud detection systems. Traditional rule-based systems, while deterministic and interpretable, are inherently reactive and struggle to adapt to evolving fraudulent patterns. Machine learning methods offer the capacity to detect subtle, multi-dimensional anomalies in claim data that would elude manual review, while blockchain architectures provide tamper-evident audit trails and decentralised consensus mechanisms that reduce opportunities for data manipulation and collusion \cite{amponsah2022}. Recent research has demonstrated that hybrid frameworks combining predictive modelling with distributed ledger technology can substantially improve detection accuracy while simultaneously providing verifiable provenance for audit decisions \cite{li2021}. This combination addresses both the detection and the accountability dimensions of the fraud problem.
+
+This chapter reviews twenty-two studies drawn from the peer-reviewed literature spanning 2016 to 2024, covering a range of machine learning techniques, sampling strategies, blockchain integration approaches, and model explainability methods relevant to healthcare insurance fraud detection. The review is structured as a narrative synthesis of individual contributions, followed by a comparative summary table and a discussion of the gaps in existing literature that the present study addresses. The reviewed works collectively represent the state of the art in algorithmic fraud detection, from classical ensemble methods and deep learning architectures to attention-based graph networks and smart contract implementations.
+
+\section{Review of Individual Studies}
+
+Mohammed et al.\ \cite{mohammed2023} conducted a comparative evaluation of six supervised machine learning algorithms applied to a blockchain-based healthcare fraud detection framework. The algorithms examined were Logistic Regression, Decision Tree, K-Nearest Neighbours, Naive Bayes, Support Vector Machine, and Random Forest, each evaluated on a labelled healthcare claims dataset integrated with a simulated blockchain environment. The study measured accuracy, precision, recall, F1-score, and execution time across all models. Random Forest achieved the highest overall accuracy and demonstrated the most favourable trade-off between detection performance and computational runtime, outperforming single estimator models by a significant margin. The authors concluded that ensemble methods are particularly well-suited to the class-imbalanced, high-dimensional characteristics of healthcare claims data, and that embedding the fraud classification pipeline within a blockchain layer adds a meaningful layer of provenance without substantially degrading throughput.
+
+Lopo et al.\ \cite{lopo2023} investigated the effect of class imbalance mitigation strategies on XGBoost-based healthcare fraud detection, comparing the Synthetic Minority Oversampling Technique (SMOTE) with Instance Hardness Threshold (IHT) undersampling at multiple class distribution ratios. The authors experimented with majority-to-minority distribution splits ranging from 50-50 to 90-10, evaluating each configuration on standard classification metrics. Their results showed that a 70 percent majority to 30 percent minority distribution, combined with SMOTE oversampling applied to the minority fraud class, produced the optimal balance between recall and precision for the XGBoost classifier. IHT-based undersampling consistently produced lower recall values, indicating a tendency to discard informative borderline instances. The study highlighted that the choice of resampling ratio is a critical but often overlooked hyperparameter in fraud detection pipelines.
+
+Johnson et al.\ \cite{johnson2023} addressed a methodologically significant problem in healthcare fraud detection evaluation: the risk of evaluation target leakage introduced by standard cross-validation procedures when applied to provider-level fraud datasets. The authors demonstrated that naive k-fold cross-validation, when applied without grouping by provider, allows information from a single provider's claims to appear in both training and test folds, artificially inflating reported performance metrics. They proposed a modified grouped cross-validation scheme applied to Medicare claims data, ensuring that all claims from a given provider are assigned exclusively to either the training or the evaluation partition. XGBoost and Random Forest were evaluated under both the naive and the corrected protocols, and the corrected procedure yielded substantially lower but more realistic performance estimates, underscoring the importance of evaluation rigour in this domain.
+
+Lu et al.\ \cite{lu2023} proposed a multi-level heterogeneous attention network for medical fraud detection, referred to as MHAMFD, designed to operate on an attributed heterogeneous information network (AHIN) constructed from Medicare claims records. The framework encodes relationships among providers, patients, and diagnostic codes as a heterogeneous graph and applies multi-head attention mechanisms at both the node and the edge levels to learn discriminative fraud-relevant representations. Evaluated on a Medicare-derived benchmark, MHAMFD achieved an accuracy of 91.94 percent, outperforming baseline graph neural network models including GraphSAGE and GAT. The authors attributed the performance gains to the model's capacity to capture cross-type relational signals that homogeneous graph models cannot represent, establishing attention-based graph learning as a promising direction for large-scale fraud detection.
+
+Nalluri et al.\ \cite{nalluri2023} conducted a systematic comparison of Support Vector Machine, Decision Tree, Random Forest, and Multilayer Perceptron classifiers on two distinct healthcare fraud datasets, evaluating performance under consistent preprocessing and feature engineering conditions. The experimental design controlled for data leakage, and both datasets underwent standard normalisation before model fitting. The Multilayer Perceptron achieved the highest accuracy of 95.29 percent across the combined evaluation, benefiting from its ability to learn non-linear feature interactions that linear and shallow tree-based models could not capture. Decision Tree produced the lowest performance, consistent with its susceptibility to overfitting on tabular medical claims data. The study reinforced the value of neural architectures even in relatively moderate-scale healthcare fraud settings.
+
+Amponsah et al.\ \cite{amponsah2022} presented a hybrid fraud detection system that combined a Decision Tree classifier with an Ethereum blockchain-based smart contract infrastructure for healthcare claims management. The Decision Tree model was trained on a publicly available healthcare fraud dataset and achieved a classification accuracy of 97.96 percent, with the smart contract layer used to record, hash, and verify individual claim decisions on the Ethereum test network. The authors demonstrated that the on-chain verification component added a non-repudiable audit trail without materially increasing end-to-end processing latency. This work is among the earliest to couple a fully functional blockchain deployment with a quantitatively validated machine learning component, making it a foundational reference for blockchain-integrated fraud detection research.
+
+Sathya and Balakumar \cite{sathya2022} proposed the Enhanced Random Forest and Support Vector Machine (eRFSVM) hybrid classifier, which combined the feature selection strengths of Random Forest with the margin-maximising decision boundary of SVM within a unified classification pipeline anchored to a blockchain audit framework. The model was evaluated on a medical insurance claims dataset, achieving an accuracy of 97.176 percent alongside precision and recall values that exceeded those of the constituent single models. The blockchain layer was implemented to ensure immutability of claim records and to provide a secure reference for the classifier's historical decisions. The eRFSVM framework demonstrated that carefully engineered hybrid classifiers can surpass both component models individually, and that blockchain integration can be made computationally practical at small to medium dataset scales.
+
+Kumaraswamy et al.\ \cite{kumaraswamy2022} developed a prescription claim fraud detection framework targeting pharmacy billing irregularities, evaluating Logistic Regression, Decision Tree, Random Forest, and Gradient Boosting on a proprietary prescription claims dataset. Performance was measured using the area under the receiver operating characteristic curve (AUC-ROC), precision, recall, and F1-score. Logistic Regression achieved the highest AUC-ROC of 0.76, a result the authors attributed to the relatively linear separability of the prescription fraud signal in the feature space constructed from temporal prescribing patterns and dosage anomalies. The study also highlighted the difficulty of working with severely class-imbalanced prescription datasets and recommended threshold calibration as a post-training step to improve operational recall.
+
+Gangadhar et al.\ \cite{gangadhar2022} introduced a Chaotic Variational Autoencoder (C-VAE) for unsupervised anomaly detection in health insurance claims, augmenting a standard variational autoencoder with a chaotic mapping function in the latent space to improve the diversity of synthetic anomaly reconstructions. The model was evaluated on a health insurance (HI) claims dataset and achieved an anomaly detection accuracy of 77.9 percent, with the chaotic perturbation demonstrably improving recall over a standard VAE baseline. The authors argued that generative anomaly detection approaches are preferable to purely supervised methods when labelled fraud examples are scarce, as the model learns the distribution of legitimate claims and flags deviations accordingly. The C-VAE represents an important contribution to the growing body of generative modelling approaches for healthcare fraud.
+
+Aziz et al.\ \cite{aziz2022} applied the LightGBM (LGBM) gradient boosting framework to the detection of fraudulent activity on the Ethereum blockchain, constructing features from transaction graph statistics, gas usage patterns, and temporal behavioural signals extracted from on-chain data. The baseline LGBM model achieved an accuracy of 98.60 percent on the labelled Ethereum fraud dataset, and a subsequent fine-tuning phase using Bayesian hyperparameter optimisation raised accuracy to 99.03 percent. The study demonstrated that gradient boosting methods combined with thoughtfully engineered graph-based features can achieve near-ceiling performance on blockchain transaction fraud, and the fine-tuning gains underscored the value of systematic hyperparameter search even for already high-performing models.
+
+Hancock and Khoshgoftaar \cite{hancock2021} performed a head-to-head comparison of CatBoost and LightGBM for Medicare fraud detection, using the Centers for Medicare and Medicaid Services (CMS) Provider Utilization and Payment Data as the primary dataset. Both models were evaluated under consistent preprocessing and class weighting conditions, with performance assessed via AUC-ROC, F1-score, and Matthews correlation coefficient. CatBoost achieved an AUC-ROC of 0.8824, marginally outperforming LightGBM, and demonstrated greater stability across multiple random seeds. The authors attributed CatBoost's advantage to its ordered boosting mechanism, which reduces prediction shift bias on categorical features prevalent in Medicare provider data. This study established CatBoost as a competitive baseline for Medicare fraud benchmarking.
+
+Bhaskar et al.\ \cite{bhaskar2021} applied the Isolation Forest algorithm to healthcare insurance fraud detection in a fully unsupervised setting, exploiting the algorithm's ability to isolate anomalies by recursively partitioning the feature space with randomly selected split points and thresholds. The model was evaluated on a healthcare claims dataset and achieved an accuracy of 98.76 percent, a strong result for an unsupervised approach. The authors demonstrated that Isolation Forest is computationally efficient and scales well to high-dimensional claim records, making it suitable for real-time deployment scenarios where labelled fraud data may not be available at the time of scoring. This work highlighted the practical value of anomaly detection frameworks as complements to supervised classifiers in production fraud detection systems.
+
+Dhieb et al.\ \cite{dhieb2020} proposed an extreme gradient boosting (XGBoost) based insurance fraud detection system integrated with a blockchain layer for secure data sharing and tamper-proof storage of model decisions. The XGBoost classifier outperformed a Decision Tree baseline by approximately 7 percentage points in accuracy, with additional gains in precision and recall attributable to XGBoost's regularisation mechanisms and iterative residual correction. The blockchain component was designed to facilitate multi-party claim processing, allowing insurers, providers, and auditors to share a verified view of claim status without exposing raw data to all parties. This combination of predictive accuracy and cryptographic data governance represented an early and influential model for the hybrid ML-blockchain paradigm in insurance fraud research.
+
+Matloob et al.\ \cite{matloob2020} explored sequential pattern mining as an alternative to instance-level classification for detecting healthcare fraud, employing Prefix Span and Compact Prediction Tree (CPT) algorithms to identify suspicious temporal sequences of claim events within provider billing histories. The framework treated consecutive claim submissions as sequences and mined frequent fraudulent patterns that could not be detected by models operating on individual claim records in isolation. Across multiple experimental configurations, the approach achieved an average accuracy of 85 percent, with CPT demonstrating stronger pattern completion performance than Prefix Span. The study contributed an important methodological perspective, demonstrating that the temporal structure of billing behaviour carries substantial fraud signal that is systematically ignored by standard feature-based classifiers.
+
+Gera et al.\ \cite{gera2020} designed an insurance claims management system built on the IBM Hyperledger Fabric permissioned blockchain, enabling peer-based claim settlement among insurance consortium members without requiring a central adjudicating authority. The system encoded claim validation and settlement logic as chaincode smart contracts, allowing claims to be reviewed, approved, and recorded on an immutable distributed ledger shared among all consortium participants. While the work did not incorporate a machine learning component, it provided a detailed technical blueprint for enterprise-grade blockchain deployment in insurance, including access control, identity management, and endorsement policy design. The IBM Hyperledger approach documented by Gera et al.\ remains the most practically detailed blockchain architecture in the healthcare fraud literature reviewed here.
+
+Johnson et al.\ \cite{johnson2019} investigated deep learning approaches for Medicare fraud detection with a focus on the class imbalance problem, applying combined random oversampling and random undersampling (ROS-RUS) strategies to a Medicare beneficiary claims dataset. A feedforward neural network was trained under multiple imbalance correction conditions, and the ROS-RUS hybrid strategy achieved the best AUC-ROC of 0.8509 among the configurations tested. The authors found that purely oversampling-based approaches tended to overfit to replicated minority class instances, while purely undersampling approaches discarded substantial majority class information; the hybrid strategy balanced these competing risks most effectively. This study established a quantitative benchmark for deep learning-based Medicare fraud detection and highlighted the centrality of imbalance handling in neural classifier performance.
+
+Bauder and Khoshgoftaar \cite{bauder2017} provided an early systematic analysis of gradient boosting methods applied to Medicare fraud detection at the provider level, constructing aggregate provider-level feature vectors from CMS claims data and training gradient boosting classifiers to identify fraudulent providers. The study evaluated multiple boosting configurations and established provider-level AUC-ROC baselines that subsequent Medicare fraud research has used as reference points. The authors emphasised the importance of feature engineering at the provider level, noting that aggregated billing behaviour features were far more informative than raw claim-level features for provider fraud classification. This work laid an important empirical foundation for subsequent studies in the Medicare fraud detection literature.
+
+Sun et al.\ \cite{sun2018} proposed the Abnormal Group Joint Fraud Detection (AGJFD) framework, designed to detect collusive fraud rings among multiple healthcare providers who coordinate false billing across shared patient pools. The method modelled provider-patient relationships as a bipartite graph and applied joint inference across connected providers to amplify fraud signals that would be too weak to detect in individual provider records. Evaluated on a real-world Chinese healthcare claims dataset, AGJFD achieved recall exceeding 80 percent on colluding provider groups, substantially outperforming independent provider-level classifiers. The study demonstrated that social network structure among providers is a valuable and underutilised signal for detecting organised healthcare fraud schemes.
+
+Bounab et al.\ \cite{bounab2024} applied XGBoost with SMOTE-ENN, a combined oversampling and edited nearest neighbour cleaning strategy, to a Medicare claims dataset exhibiting severe class imbalance. The SMOTE-ENN approach first synthesised minority class instances using SMOTE and then removed noisy borderline samples using the Edited Nearest Neighbours rule, producing a cleaner and more balanced training distribution than SMOTE alone. The resulting XGBoost model achieved an F1-score of 0.96 on the held-out test partition, representing a substantial improvement over models trained without imbalance correction. The authors conducted ablation experiments confirming that both the synthesis and cleaning steps of SMOTE-ENN contributed independently to the final performance, and that either step omitted in isolation produced measurably inferior results.
+
+Lundberg and Lee \cite{lundberg2017} introduced SHapley Additive exPlanations (SHAP), a unified framework for computing feature importance attributions grounded in cooperative game theory. SHAP assigns each feature a contribution value for a specific prediction by computing the marginal contribution of that feature across all possible subsets of features, satisfying the axioms of efficiency, symmetry, dummy, and additivity. Applied to gradient boosting models, SHAP produces locally faithful and globally consistent explanations that have become the standard interpretability tool in machine learning for tabular data. In the context of healthcare fraud detection, SHAP enables auditors and regulators to understand precisely which billing patterns drove a specific fraud prediction, addressing the interpretability deficit of black-box ensemble models.
+
+Ribeiro et al.\ \cite{ribeiro2016} proposed Local Interpretable Model-Agnostic Explanations (LIME), a method for generating locally faithful explanations of any black-box classifier by fitting a sparse linear model to the decision surface in the neighbourhood of a specific input instance. LIME perturbs the input features, obtains predictions from the original model on the perturbed samples, and trains a weighted linear model on the resulting neighbourhood to approximate the local decision boundary. The method is model-agnostic and has been applied to neural networks, ensemble methods, and support vector machines across a wide range of domains. In healthcare fraud detection, LIME complements SHAP by providing a second, independently derived explanation mechanism that can corroborate or highlight discrepancies in feature attributions.
+
+Akiba et al.\ \cite{akiba2019} presented Optuna, an automatic hyperparameter optimisation framework based on a define-by-run API that enables efficient search of complex, conditional hyperparameter spaces through Tree-structured Parzen Estimator (TPE) sampling and pruning of unpromising trials. Optuna supports parallel and distributed optimisation, integrates with major machine learning frameworks including XGBoost, LightGBM, and PyTorch, and provides visualisation tools for analysing the optimisation history and parameter importances. Compared to grid search and random search, Optuna's TPE sampler converges to high-performing configurations with substantially fewer function evaluations, making it particularly valuable for models with many interacting hyperparameters such as gradient boosting ensembles. The framework was adopted in the present study as the primary hyperparameter tuning engine, replacing manual or grid-based search procedures used in prior healthcare fraud detection work.
+
+\section{Comparison of Literature Review}
+
+\begin{center}
+\captionof{table}{Comparison of Reviewed Studies in Healthcare Fraud Detection}
+\label{tab:lit_review_comparison}
+\end{center}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.8cm} >{\raggedright\arraybackslash}p{5.6cm} >{\raggedright\arraybackslash}p{4.8cm}}
+\toprule
+\textbf{Author(s) and Year} & \textbf{Technique} & \textbf{Outcome / Key Result} \\
+\midrule
+\endfirsthead
+
+\multicolumn{3}{l}{\small\textit{Table \ref{tab:lit_review_comparison} continued from previous page}} \\
+\toprule
+\textbf{Author(s) and Year} & \textbf{Technique} & \textbf{Outcome / Key Result} \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{3}{r}{\small\textit{Continued on next page}} \\
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+Mohammed et al.\ (2023) \cite{mohammed2023}
+& Six ML algorithms (LR, DT, KNN, NB, SVM, RF) on blockchain-integrated healthcare claims
+& RF achieved best accuracy and runtime trade-off among all six models \\
+\addlinespace
+
+Lopo et al.\ (2023) \cite{lopo2023}
+& XGBoost with SMOTE and IHT resampling at multiple distribution ratios
+& 70:30 majority-minority split with SMOTE yielded optimal F1 performance \\
+\addlinespace
+
+Johnson et al.\ (2023) \cite{johnson2023}
+& Modified grouped cross-validation to prevent target leakage; XGBoost and RF on Medicare
+& Corrected CV revealed substantially lower but realistic performance estimates \\
+\addlinespace
+
+Lu et al.\ (2023) \cite{lu2023}
+& MHAMFD multi-level attention network on attributed heterogeneous information network (AHIN)
+& 91.94\% accuracy, outperforming GraphSAGE and GAT baselines \\
+\addlinespace
+
+Nalluri et al.\ (2023) \cite{nalluri2023}
+& SVM, DT, RF, and MLP evaluated on two healthcare fraud datasets
+& MLP achieved best accuracy at 95.29\% \\
+\addlinespace
+
+Amponsah et al.\ (2022) \cite{amponsah2022}
+& Decision Tree classifier with Ethereum smart contract audit layer
+& 97.96\% accuracy with verifiable on-chain claim decisions \\
+\addlinespace
+
+Sathya and Balakumar (2022) \cite{sathya2022}
+& eRFSVM hybrid (RF feature selection + SVM classifier) with blockchain logging
+& 97.176\% accuracy, exceeding individual RF and SVM baselines \\
+\addlinespace
+
+Kumaraswamy et al.\ (2022) \cite{kumaraswamy2022}
+& LR, DT, RF, and Gradient Boosting on prescription claims; AUC-ROC evaluation
+& LR achieved best AUC-ROC of 0.76 on prescription fraud task \\
+\addlinespace
+
+Gangadhar et al.\ (2022) \cite{gangadhar2022}
+& Chaotic Variational Autoencoder (C-VAE) for unsupervised anomaly detection
+& 77.9\% anomaly detection accuracy on health insurance data \\
+\addlinespace
+
+Aziz et al.\ (2022) \cite{aziz2022}
+& LightGBM (LGBM) with graph-based transaction features on Ethereum fraud data
+& 98.60\% accuracy baseline; fine-tuned to 99.03\% \\
+\addlinespace
+
+Hancock and Khoshgoftaar (2021) \cite{hancock2021}
+& CatBoost vs.\ LightGBM on CMS Medicare Provider Utilization Data
+& CatBoost AUC-ROC 0.8824, marginally outperforming LightGBM \\
+\addlinespace
+
+Bhaskar et al.\ (2021) \cite{bhaskar2021}
+& Isolation Forest unsupervised anomaly detection on insurance claims
+& 98.76\% accuracy without any labelled fraud supervision \\
+\addlinespace
+
+Dhieb et al.\ (2020) \cite{dhieb2020}
+& XGBoost classifier integrated with permissioned blockchain for insurance fraud
+& XGBoost exceeded DT baseline by approximately 7 percentage points \\
+\addlinespace
+
+Matloob et al.\ (2020) \cite{matloob2020}
+& Prefix Span and CPT sequential pattern mining on billing event sequences
+& Average accuracy of 85\% capturing temporal fraud patterns \\
+\addlinespace
+
+Gera et al.\ (2020) \cite{gera2020}
+& IBM Hyperledger Fabric smart contract for peer-based claim settlement
+& Demonstrated enterprise-grade blockchain claim governance without central authority \\
+\addlinespace
+
+Johnson et al.\ (2019) \cite{johnson2019}
+& Deep learning with ROS-RUS hybrid resampling on Medicare beneficiary claims
+& AUC-ROC 0.8509 with combined oversampling and undersampling strategy \\
+\addlinespace
+
+Bauder and Khoshgoftaar (2017) \cite{bauder2017}
+& Gradient boosting on provider-level aggregate feature vectors from CMS data
+& Established provider-level AUC-ROC baselines for Medicare fraud benchmarking \\
+\addlinespace
+
+Sun et al.\ (2018) \cite{sun2018}
+& AGJFD bipartite graph joint inference for collusive provider fraud groups
+& Recall exceeding 80\% on coordinated provider fraud rings \\
+\addlinespace
+
+Bounab et al.\ (2024) \cite{bounab2024}
+& XGBoost with SMOTE-ENN combined oversampling and noise cleaning on Medicare
+& F1-score of 0.96; ablation confirmed both SMOTE and ENN steps contribute \\
+\addlinespace
+
+Lundberg and Lee (2017) \cite{lundberg2017}
+& SHAP (SHapley Additive exPlanations) for global and local feature attribution
+& Unified game-theoretic framework satisfying efficiency, symmetry, and additivity axioms \\
+\addlinespace
+
+Ribeiro et al.\ (2016) \cite{ribeiro2016}
+& LIME (Local Interpretable Model-Agnostic Explanations) via neighbourhood linear approximation
+& Model-agnostic local explanations applicable to any black-box classifier \\
+\addlinespace
+
+Akiba et al.\ (2019) \cite{akiba2019}
+& Optuna hyperparameter optimisation using Tree-structured Parzen Estimator (TPE) sampling
+& Faster convergence to optimal configurations compared to grid and random search \\
+
+\end{longtable}
+
+\section{Identified Gaps in the Literature}
+
+A careful synthesis of the twenty-two studies reviewed above reveals several recurring limitations that the present thesis is designed to address. First, while hyperparameter tuning is acknowledged as important in nearly every study, none of the reviewed works employed a principled automated optimisation framework such as Optuna; most relied on default parameters, manual grid search, or at best limited random search, leaving substantial performance gains unrealised. Second, although class imbalance is universally recognised as the central challenge in healthcare fraud detection, no existing study conducted a systematic ablation of SMOTE variants and resampling ratios within the same experimental pipeline, making it impossible to determine the relative contribution of imbalance correction independent of model choice. Third, the blockchain implementations reviewed span a wide spectrum from toy Ethereum test-network prototypes to descriptive Hyperledger architectures, but none paired a fully operational smart contract layer with a rigorously optimised and interpretable machine learning model in a single integrated system. Fourth, no prior work combined both SHAP and LIME explainability analyses within a fraud detection pipeline anchored to a blockchain audit trail, leaving a critical gap between predictive performance and the regulatory-grade interpretability required for real-world deployment. Existing work on this dataset also does not consistently apply fold-aware feature computation, where all provider-level statistics (z-scores, physician averages, network metrics) are computed strictly within each cross-validation fold rather than on the full dataset prior to splitting. The present study fills these gaps by integrating Optuna-tuned gradient boosting with SMOTE ablation experiments, dual SHAP and LIME explanations, and an Ethereum-compatible smart contract layer into a single coherent and reproducible framework.

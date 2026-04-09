@@ -1,0 +1,34 @@
+{
+  "blockchain": {
+    "chain_length": 110,
+    "total_records": 5411,
+    "difficulty": 2,
+    "batch_size": 50,
+    "build_time_seconds": 7.029139757156372,
+    "validation": "PASSED",
+    "hash_algorithm": "SHA-256",
+    "merkle_tree": true,
+    "proof_of_work": true,
+    "persistence": "SQLite"
+  },
+  "ecies": {
+    "curve": "secp256k1",
+    "kdf": "HKDF-SHA256",
+    "cipher": "AES-256-GCM",
+    "key_size_bits": 256,
+    "fields_encrypted": [
+      "provider_id"
+    ]
+  },
+  "predictions": {
+    "total_providers": 5410,
+    "flagged_fraud": 506,
+    "fraud_rate": 0.09353049907578559,
+    "risk_distribution": {
+      "critical": 488,
+      "high": 18,
+      "medium": 6,
+      "low": 4898
+    }
+  }
+}

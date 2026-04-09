@@ -1,0 +1,19 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {2.1}{\ignorespaces Comparison of Reviewed Studies in Healthcare Fraud Detection}}{25}{table.2.1}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {3.1}{\ignorespaces Key columns in the Kaggle rohitrox Healthcare Provider Fraud Detection dataset}}{35}{table.caption.3}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Design decisions and rationale for key architectural choices.}}{40}{table.3.2}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces Optuna hyperparameter optimisation results (60 trials, 5-fold inner CV, AUC-PR objective, no SMOTE).}}{48}{table.caption.5}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Ten-fold stratified cross-validation results: mean F1-score for all model configurations (tuned, no SMOTE).}}{49}{table.caption.6}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Weighted ensemble classification metrics at fixed threshold $t = 0.444$.}}{51}{table.caption.10}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Bootstrap confidence intervals for the weighted ensemble at fixed threshold $t = 0.444$ ($n = 2{,}000$ resamples, 95\% CI).}}{52}{table.caption.12}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces SMOTE-ENN ablation: F1 scores with and without oversampling (10-fold CV, tuned models).}}{53}{table.caption.15}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces Feature-selection ablation: XGBoost F1 as a function of top-$K$ SHAP-ranked features (10-fold CV, tuned).}}{65}{table.caption.27}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {A.1}{\ignorespaces Table A.1: XGBoost Best Hyperparameter Configuration (Optuna, 60 Trials)}}{87}{table.caption.33}%
+\contentsline {table}{\numberline {A.2}{\ignorespaces Table A.2: Best Hyperparameter Configurations for All Models}}{88}{table.caption.34}%
+\contentsline {table}{\numberline {A.3}{\ignorespaces Table A.3: Model Performance (10-Fold Stratified CV, Mean F1)}}{88}{table.caption.35}%
+\contentsline {table}{\numberline {A.4}{\ignorespaces Table A.4: Core 52 Engineered Provider-Level Features}}{89}{table.A.4}%

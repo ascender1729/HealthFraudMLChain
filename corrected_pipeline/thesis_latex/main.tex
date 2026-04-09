@@ -1,0 +1,285 @@
+\documentclass[12pt,a4paper,oneside]{report}
+
+% ---- Packages ----
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath,amssymb}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tocloft}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,shapes.geometric,arrows.meta}
+
+% ---- Page setup (matching original NIT Patna thesis) ----
+\sloppy
+\onehalfspacing
+\setlength{\parindent}{0.5in}
+\setlength{\parskip}{0pt}
+
+% ---- Chapter/Section formatting (matching original) ----
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\centering\Large}
+  {\MakeUppercase{\chaptertitlename}\ \thechapter}{0pt}
+  {\Large\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{0pt}{20pt}
+
+\titleformat{\section}
+  {\normalfont\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\bfseries}{\thesubsection}{1em}{}
+
+% ---- TOC/LOF/LOT formatting (colon after figure/table number) ----
+\renewcommand{\cftfigpresnum}{Figure }
+\renewcommand{\cftfigaftersnum}{:}
+\setlength{\cftfignumwidth}{6em}
+\renewcommand{\cfttabpresnum}{Table }
+\renewcommand{\cfttabaftersnum}{:}
+\setlength{\cfttabnumwidth}{5.5em}
+
+% ---- Header/Footer ----
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% ---- Listings style for code/JSON ----
+\lstset{
+  basicstyle=\small\ttfamily,
+  breaklines=true,
+  frame=single,
+  numbers=none,
+  captionpos=b,
+}
+
+% ---- Hyperref setup ----
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue,
+}
+
+% ---- Figure path ----
+\graphicspath{{figures/}{../results/figures/}}
+
+\begin{document}
+
+% ====================================================================
+% TITLE PAGE
+% ====================================================================
+\begin{titlepage}
+\centering
+\vspace*{1cm}
+
+{\Large\bfseries
+\begin{spacing}{1.2}
+\centering
+ENHANCING HEALTHCARE INSURANCE FRAUD\\[3pt]
+DETECTION AND PREVENTION WITH A MACHINE\\[3pt]
+LEARNING AND BLOCKCHAIN-BASED APPROACH
+\end{spacing}
+}
+
+\vspace{1.5cm}
+{\large\bfseries A Dissertation}
+
+\vspace{0.5cm}
+Submitted in Partial Fulfilment of the Requirements for\\
+the Award of the Degree of
+
+\vspace{0.5cm}
+{\large\bfseries Integrated Master of Science}\\
+\textit{In}\\
+{\large\bfseries Mathematics}
+
+\vspace{1cm}
+\textit{Submitted by}\\
+{\large\bfseries Dubasi Pavan Kumar}\\
+Roll No. 1909012, Enrolment No. 190616
+
+\vspace{1cm}
+\textit{Under the Supervision of}\\
+{\large\bfseries Dr. Rajesh Kumar Sinha}\\
+Assistant Professor
+
+\vspace{1cm}
+\includegraphics[width=3cm]{nitp-logo.png}
+
+\vspace{0.5cm}
+{\large\bfseries Department of Mathematics}\\
+NATIONAL INSTITUTE OF TECHNOLOGY PATNA\\
+PATNA -800005\\
+{\large\bfseries January to June, 2024}
+\end{titlepage}
+
+% ====================================================================
+% FRONT MATTER
+% ====================================================================
+\pagenumbering{roman}
+
+% ---- CERTIFICATE ----
+\newpage
+\begin{center}
+{\Large\bfseries CERTIFICATE}
+\end{center}
+
+\vspace{2cm}
+
+This is to certify that \textbf{Mr. Dubasi Pavan Kumar}, with \textbf{Roll No. 1909012} and \textbf{Enrollment No. 190616}, is registered for the Integrated Master of Science Programme in the Department of Mathematics at the National Institute of Technology Patna.
+
+\vspace{1.5cm}
+
+I hereby recommend that the Dissertation entitled ``\textbf{Enhancing Healthcare Insurance Fraud Detection And Prevention With A Machine Learning And Blockchain-based Approach}'' be accepted as partial fulfillment of the requirements for evaluation and award of the Integrated Master of Science degree by the National Institute of Technology Patna.
+
+\vspace{4cm}
+
+\noindent
+\begin{minipage}[t]{0.45\textwidth}
+\rule{5cm}{0.5pt}\\
+Dr. Rajesh Kumar Sinha\\
+Assistant Professor\\
+Department of Mathematics\\
+National Institute of Technology, Patna
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+\raggedleft
+\rule{5cm}{0.5pt}\\
+Dr. Rishi Kumar Jha\\
+Head of the Department\\
+Department of Mathematics\\
+National Institute of Technology Patna
+\end{minipage}
+
+% ---- DECLARATION ----
+\newpage
+\begin{center}
+{\Large\bfseries DECLARATION AND COPYRIGHT TRANSFER}
+\end{center}
+
+\vspace{1cm}
+
+I, Dubasi Pavan Kumar, Roll No. 1909012, and Enrolment No. 190616, am a registered candidate for the Integrated Master's Programme under the Department of Mathematics at the National Institute of Technology Patna. I hereby declare that the work presented in this Dissertation is my own original work and does not contain any material for which the copyright belongs to a third party. Furthermore, I confirm that this work has not been presented, and will not be presented, to any other University/Institute for a similar or any other degree award.
+
+I further confirm that for all third-party copyright material in my Major Project (including any electronic attachments), I have ``blanked out'' third party material from the copies of the thesis/dissertation/book/articles etc; fully referenced the deleted materials and where possible, provided links (url) to electronic sources of the material.
+
+I hereby transfer exclusive copyright for this Major Project to National Institute of Technology Patna. The following rights are reserved by the author:
+
+\begin{enumerate}[label=\alph*)]
+\item The right to use, free of charge, all, or part of this article in my future work, such as books and lectures, giving reference to the original place of publication and copyright holding.
+\item The right to reproduce the article or thesis for my own purpose, provided that the copies are not offered for sale.
+\end{enumerate}
+
+\vspace{2cm}
+
+\noindent
+\rule{5cm}{0.5pt}\\
+Dubasi Pavan Kumar\\
+Roll No. 1909012\\
+Integrated Master of Science\\
+Department of Mathematics\\
+Date:
+
+% ---- COPYRIGHT NOTICE ----
+\newpage
+\begin{center}
+\vspace*{3cm}
+{\Large\bfseries COPYRIGHT NOTICE}
+\end{center}
+
+\vspace{2cm}
+
+\begin{center}
+Copyright \textcopyright\ 2024 by NIT Patna. All rights reserved.
+\end{center}
+
+\vspace{1cm}
+
+No part of this publication may be reproduced, distributed, or transmitted in any form or by any means, including photocopying, recording, or other electronic or mechanical methods, without prior written permission, except in the case of brief quotations embodied in critical scholarly reviews, and other non-commercial uses with an acknowledgment/reference permitted by copyright law.
+
+% ---- ACKNOWLEDGMENT ----
+\newpage
+\begin{center}
+{\Large\bfseries ACKNOWLEDGMENT}
+\end{center}
+
+\vspace{1cm}
+
+\hspace{0.5in}I am deeply grateful to my supervisor, Dr. Rajesh Kumar Sinha, for his invaluable guidance, feedback, and engagement throughout the development of this project. His expertise and insights have been instrumental in shaping my work and ensuring its success.
+
+\hspace{0.5in}I would also like to extend my sincere appreciation to my colleagues and family members, who generously offered their time and expertise to support me in this endeavor. Their collaboration and encouragement have been vital in bringing this project to fruition.
+
+\hspace{0.5in}I am grateful to Dr. Rishi Kumar Jha, Associate Professor \& Head of the Department of Mathematics at the National Institute of Technology Patna, for his cooperation and for providing all the necessary resources and facilities for the completion of this project.
+
+\hspace{0.5in}Lastly, I would like to express my heartfelt gratitude to my parents and all faculty members of the Department of Mathematics for their constant support, encouragement, and belief in me throughout this journey. Their unwavering support has been my source of strength and inspiration.
+
+% ---- DEDICATION ----
+\newpage
+\vspace*{5cm}
+\begin{center}
+\textit{This Dissertation is wholeheartedly dedicated to my friends\\
+Vilas Choudhury, Billa Sujith, Vikram Patil who have provided unwavering\\
+motivation and steadfast support throughout this academic journey.}
+\end{center}
+
+% ---- ABSTRACT ----
+\newpage
+\begin{center}
+{\Large\bfseries ABSTRACT}
+\end{center}
+
+\vspace{1cm}
+
+\hspace{0.5in}The recent global digital revolution has profoundly impacted the healthcare industry, prompting an in-depth exploration of how AI, cloud computing, and blockchain technology can enhance healthcare systems. This study specifically focuses on the rising issue of healthcare insurance fraud and how the combination of machine learning (ML) and blockchain technology offers a robust solution. The research delves into various fraud detection methodologies, including supervised and unsupervised learning, mixed methods, and blockchain-based solutions. It highlights the critical importance of security and privacy issues in healthcare apps, such as maintaining patient confidentiality, verifying user identities, and ensuring data integrity.
+
+\hspace{0.5in}The study investigates the effectiveness of blockchain-based systems and ML classifiers, including XGBoost, LightGBM, CatBoost, Gradient Boosting, Random Forest, and a weighted ensemble method, in detecting healthcare fraud. The approach involves aggregating 558,211 Medicare claims into 5,410 provider-level records with 190 engineered features, applying Optuna-tuned hyperparameters with 10-fold stratified cross-validation, and securing prediction records through ECIES encryption (secp256k1 + AES-256-GCM) on a SHA-256 blockchain with Merkle tree integrity verification.
+
+\hspace{0.5in}The results demonstrate that a weighted ensemble of the five Optuna-tuned tree-based classifiers achieves the best F1-score of 0.7345 at a fixed threshold of $t=0.444$, with a precision of 73.7\% and recall of 74.7\%. A notable finding is that SMOTE-ENN synthetic oversampling consistently degrades performance by 7 to 10 percent, with native cost-sensitive class weighting proving superior for this imbalanced dataset. SHAP and LIME explainability analyses identify deductible payment patterns, maximum reimbursement amounts, and claim duration anomalies as the strongest fraud indicators.
+
+\hspace{0.5in}In conclusion, the dissertation evaluates the real-world implications of the proposed approach, emphasizing its potential to significantly streamline fraud detection within the healthcare insurance ecosystem through the integration of interpretable machine learning and cryptographically secure audit trails.
+
+\vspace{1cm}
+
+\noindent\textbf{Keywords:} Healthcare Fraud, Machine Learning, Blockchain, ECIES Encryption, XGBoost, SHAP, LIME, Optuna, SMOTE-ENN, Ensemble Models, Provider-Level Fraud Detection, Merkle Tree, SHA-256, Cost-Sensitive Learning.
+
+% ---- TABLE OF CONTENTS ----
+\newpage
+\tableofcontents
+
+\newpage
+\listoffigures
+
+\newpage
+\listoftables
+
+% ====================================================================
+% MAIN CONTENT (modular chapter inputs)
+% ====================================================================
+\newpage
+\pagenumbering{arabic}
+
+\input{chapters/ch1_introduction}
+\input{chapters/ch2_literature_review}
+\input{chapters/ch3_methodology}
+\input{chapters/ch4_results}
+\input{chapters/ch5_conclusion}
+
+\end{document}

@@ -1,0 +1,680 @@
+\chapter{Methodology}
+
+% ====================================================================
+\section{Overview}
+% ====================================================================
+
+This chapter presents the methodology adopted for developing an
+integrated healthcare insurance fraud detection system that combines machine
+learning with cryptographically secure blockchain technology. The
+proposed framework proceeds through eight sequential stages: raw data collection
+and merging, ECIES-based encryption of sensitive provider and beneficiary
+information, SHA-256 blockchain storage with Merkle tree integrity verification,
+preprocessing and provider-level feature engineering, Optuna-driven
+hyperparameter optimisation, ensemble machine learning classification with
+10-fold stratified cross-validation, threshold optimisation over the
+precision-recall curve, and final performance evaluation augmented by SHAP and
+LIME explainability analyses. Each stage is motivated by specific limitations
+identified in the prior literature and is grounded in reproducible, open-source
+implementations using methods available before June 2024. Together, these stages
+form a complete, end-to-end pipeline that addresses both the predictive accuracy
+and the auditability requirements of a production-grade fraud detection system
+for the Centers for Medicare and Medicaid Services (CMS) context.
+
+% ====================================================================
+\section{Background Study}
+% ====================================================================
+
+Healthcare fraud imposes a severe and growing burden on health systems worldwide.
+The United States Federal Bureau of Investigation estimates that fraudulent
+billing, unnecessary procedures, and identity theft collectively drain tens of
+billions of dollars annually from Medicare and Medicaid alone, with the
+Congressional Budget Office placing the share of improper payments in the United
+States public insurance system between 7 and 10 per cent of total expenditure
+\cite{fbi2021,cbo2022}. Globally, the World Health Organisation has estimated
+that between 10 and 25 per cent of all healthcare spending is lost to fraud,
+waste, and abuse, with low- and middle-income countries bearing a
+disproportionate share of this burden due to weaker audit infrastructure
+\cite{who2010}. Fraudulent schemes range from upcoding and phantom billing by
+providers to beneficiary identity theft and kickback arrangements between
+suppliers and clinicians. The Medicare programme administered by the CMS is a
+particularly attractive target because of its high claim volume, the complexity
+of its reimbursement rules, and the limited capacity for manual pre-payment
+auditing at scale.
+
+Traditional fraud detection in healthcare has relied on retrospective rule-based
+auditing, statistical outlier detection, and manual case review by trained
+investigators. While these approaches establish a necessary baseline, they are
+inadequate against sophisticated and adaptive fraud schemes that deliberately
+stay below detection thresholds or exploit new billing codes. Machine learning
+offers a data-driven alternative that can identify complex, non-linear patterns
+across high-dimensional feature spaces derived from claims data, beneficiary
+demographics, and provider behaviour. Blockchain technology complements ML by
+providing a tamper-evident, append-only ledger for storing prediction records,
+thereby enabling post-hoc auditability and regulatory compliance. The combination
+of these two paradigms has attracted growing research interest since approximately
+2018, with early work focusing on federated learning for privacy preservation and
+more recent contributions exploring zero-knowledge proofs and smart-contract-based
+audit trails. The present study operationalises these ideas on the publicly
+available CMS-derived Kaggle dataset to produce a reproducible, benchmarked
+reference implementation.
+
+% ====================================================================
+\section{Research Gap}
+% ====================================================================
+
+A systematic review of the existing literature on healthcare fraud detection
+reveals that, while considerable progress has been made in applying individual
+machine learning algorithms to insurance claims data, several important gaps
+persist. These gaps concern the depth of feature engineering, the choice of
+evaluation metrics, the handling of class imbalance, the integration of
+explainability tools, the incorporation of cryptographic privacy guarantees, and
+the end-to-end validation of blockchain-backed audit trails. The following
+subsections characterise each gap and explain how the present study addresses it.
+
+\subsection{Limited Utilisation of Advanced Technologies}
+
+The majority of published healthcare fraud detection studies rely on a narrow set
+of classical algorithms such as logistic regression, naive Bayes, and shallow
+decision trees, without exploring the performance improvements available from
+gradient-boosted ensembles or systematic hyperparameter search. Recent advances in
+gradient boosting frameworks such as XGBoost \cite{chen2016}, LightGBM
+\cite{ke2017}, and CatBoost \cite{prokhorenkova2018}, combined with automated
+hyperparameter optimisation libraries such as Optuna \cite{akiba2019}, offer
+substantially higher predictive accuracy on tabular imbalanced datasets. The
+present study addresses this gap by benchmarking five classifiers and applying
+Optuna-based Bayesian hyperparameter search with 60 trials per model, thereby
+applying the state of the art in tabular machine learning within a rigorous
+cross-validation protocol.
+
+\subsection{Lack of Comprehensive Data Integration}
+
+Many prior studies analyse only inpatient or outpatient claims in isolation,
+forgoing the complementary diagnostic signals available when both data sources are
+merged with beneficiary demographic records. This fragmented approach results in
+incomplete provider-level profiles and diminishes the discriminative power of the
+feature set. The present study addresses this gap by merging four raw CSV files
+from the Kaggle rohitrox dataset, producing a unified claim-level table of
+558,211 records that is subsequently aggregated to 5,410 provider-level
+observation vectors with 190 engineered features, thereby capturing the full
+breadth of each provider's billing behaviour and patient population.
+
+\subsection{Dynamic Nature of Fraud Schemes}
+
+Fraudulent providers frequently adapt their billing patterns in response to
+detection systems, rendering static rule-based detectors obsolete within months
+of deployment. A purely accuracy-driven ML model that maximises a fixed
+probability threshold is similarly brittle when the distribution of fraud patterns
+shifts. The present study addresses this challenge by supplementing standard
+accuracy metrics with area under the precision-recall curve (AUC-PR), Matthews
+Correlation Coefficient (MCC), and an explicit threshold optimisation step that
+selects the operating point maximising the F1-score on held-out data, providing
+a more robust and adjustable detection boundary than a fixed 0.5 cutoff.
+
+\subsection{Blockchain Integration}
+
+The existing fraud detection literature largely treats the prediction model as a
+standalone artefact, providing no mechanism for immutably recording which
+providers were flagged, when, by which model version, or under which
+hyperparameter configuration. This absence of an auditable chain of custody
+complicates regulatory compliance and post-hoc dispute resolution. The present
+study addresses this gap by implementing a SHA-256 blockchain with Merkle tree
+integrity verification that stores every fraud prediction record in tamper-evident
+blocks, enabling independent verification of the audit trail without requiring
+access to the raw data or model weights.
+
+\subsection{Ethical and Privacy Concerns}
+
+Healthcare data contains highly sensitive beneficiary information whose exposure
+violates both HIPAA and ethical research norms. Studies that store raw beneficiary
+identifiers alongside prediction outputs on shared ledgers or public repositories
+introduce unacceptable re-identification risks. The present study addresses this
+concern by encrypting all personally identifiable fields using the Elliptic Curve
+Integrated Encryption Scheme (ECIES) with the secp256k1 curve, HKDF-SHA256 key
+derivation, and AES-256-GCM authenticated encryption before any record is written
+to the blockchain, ensuring that only holders of the authorised private key can
+recover plaintext beneficiary information.
+
+\subsection{Cost-Effectiveness}
+
+Healthcare insurers and government audit agencies operate under strict budget
+constraints that limit the number of providers that can be subjected to full
+manual investigation. A fraud detection system that achieves high recall but very
+low precision wastes investigative resources on false positives, while a system
+that optimises precision at the expense of recall allows a large proportion of
+fraudulent providers to escape detection. The present study addresses this
+trade-off explicitly by reporting the full precision-recall curve, selecting an
+operating threshold that balances precision and recall for the specific cost
+structure of Medicare audits, and computing the F2-score in supplementary
+analyses to reflect the higher societal cost of missed fraud compared to false
+alarms.
+
+\subsection{Regulatory Compliance}
+
+Fraud detection systems deployed within the CMS ecosystem must satisfy audit
+trail, data retention, and explainability requirements imposed by the Office of
+Inspector General and the False Claims Act. Prior ML-based studies rarely address
+these operational constraints, producing systems that perform well on benchmark
+datasets but cannot be integrated into existing compliance workflows. The present
+study addresses this gap by designing the blockchain storage layer to preserve
+immutable, time-stamped records of every prediction event and by generating SHAP
+summary plots and LIME explanations for every flagged provider, providing the
+human-readable justifications required under emerging AI accountability
+frameworks.
+
+\subsection{User Adoption and Training}
+
+Even technically superior fraud detection systems fail in practice if
+investigators and auditors cannot understand or trust the system's outputs. Black-
+box models that produce probability scores without feature-level justifications
+are routinely rejected or underutilised by clinical and administrative staff.
+The present study addresses this adoption barrier by integrating post-hoc
+explainability at two levels: global feature importance via SHAP beeswarm and
+bar plots that characterise population-level fraud drivers, and local instance
+explanations via LIME that provide per-provider rationales directly suitable for
+inclusion in audit reports submitted to human reviewers.
+
+\subsection{Real-World Implementation Challenges}
+
+Transitioning a fraud detection model from a research notebook to a production
+system introduces challenges around reproducibility, containerisation, and
+end-to-end data flow. Many published studies omit the engineering artefacts
+necessary for real-world deployment. The present study addresses this gap by
+providing a fully containerised pipeline implemented with Docker and
+\texttt{docker-compose}, with each phase encapsulated in a separate Python script
+that accepts command-line arguments for data directories, hyperparameter budgets,
+and blockchain difficulty settings, ensuring that the results are fully
+reproducible from the raw Kaggle CSV files.
+
+\subsection{Benchmarking and Evaluation Metrics}
+
+A recurring weakness in the healthcare fraud detection literature is the reliance
+on accuracy or ROC-AUC as the primary evaluation metric. On highly imbalanced
+datasets such as the CMS provider labels used here, where only 9.4 per cent of
+providers are fraudulent, a naive classifier that predicts ``non-fraud'' for all
+providers achieves 90.6 per cent accuracy. The present study addresses this by
+reporting a full suite of metrics including F1-score, precision, recall,
+AUC-PR, MCC, and ROC-AUC across 10-fold stratified cross-validation, providing
+statistically meaningful comparisons between all five classifiers and their
+SMOTE-ENN ablations.
+
+% ====================================================================
+\section{Dataset Description}
+% ====================================================================
+
+The dataset used in this study is the Healthcare Provider Fraud Detection Analysis
+dataset published by \textit{rohitrox} on Kaggle, derived from publicly available
+Centers for Medicare and Medicaid Services (CMS) Medicare claims records. The
+dataset comprises four CSV files: \texttt{Train.csv} containing labels for 5,410
+providers (``Yes'' or ``No'' for \texttt{PotentialFraud}),
+\texttt{Train\_Beneficiarydata} with demographic and chronic condition records for
+138,556 unique beneficiaries, \texttt{Train\_Inpatientdata} with 40,474 inpatient
+hospitalisation claims, and \texttt{Train\_Outpatientdata} with 517,737 outpatient
+visit claims. After merging and outer-joining inpatient and outpatient claims, then
+joining with beneficiary demographics and provider labels, the resulting
+claim-level table contains 558,211 rows. This merged table is subsequently
+aggregated to 5,410 provider-level observation vectors with 190 engineered
+features. The target variable is severely imbalanced: 506 providers (9.4\%) are
+labelled as potential fraud and 4,904 (90.6\%) are labelled as non-fraud. Table
+\ref{tab:dataset_features} describes the principal raw columns used in the
+analysis.
+
+\begin{table}[H]
+\centering
+\caption{Key columns in the Kaggle rohitrox Healthcare Provider Fraud Detection dataset}
+\label{tab:dataset_features}
+\begin{tabular}{p{4.5cm} p{9.5cm}}
+\toprule
+\textbf{Column Name} & \textbf{Description} \\
+\midrule
+\texttt{Provider} & Unique alphanumeric identifier for each healthcare provider (primary key for aggregation) \\
+\texttt{BeneID} & Unique identifier for each Medicare beneficiary \\
+\texttt{ClaimID} & Unique identifier for each individual insurance claim \\
+\texttt{ClaimStartDt} & Date on which the insurance claim period began; used to compute claim duration and beneficiary age at claim time \\
+\texttt{ClaimEndDt} & Date on which the claim period ended; difference from \texttt{ClaimStartDt} gives claim duration in days \\
+{\footnotesize\texttt{InscClaimAmtReimbursed}} & Total amount reimbursed by Medicare for the claim in US dollars \\
+\texttt{DeductibleAmtPaid} & Out-of-pocket deductible amount paid by the beneficiary \\
+\texttt{AdmissionDt} & Date of hospital admission (inpatient claims only) \\
+\texttt{DischargeDt} & Date of hospital discharge (inpatient claims only); used to compute length of stay \\
+\texttt{DOB} & Beneficiary date of birth; used to compute patient age at claim time \\
+\texttt{DOD} & Beneficiary date of death (if applicable); used to compute the dead-patient ratio per provider \\
+\texttt{ChronicCond\_*} & Binary indicators (1 = yes, 2 = no) for 11 chronic conditions including Alzheimer's disease, heart failure, chronic kidney disease, cancer, obstructive pulmonary disease, depression, diabetes, ischaemic heart disease, osteoporosis, rheumatoid arthritis, and stroke \\
+\texttt{AttendingPhysician} & Anonymised identifier of the attending physician; used to count unique physicians per provider \\
+\texttt{ClmDiagnosisCode\_1} & Primary ICD diagnosis code for the claim; used to count unique diagnosis codes per provider \\
+\texttt{PotentialFraud} & Binary target variable (``Yes''/``No'') indicating whether the provider has been identified as a potential fraudster \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ====================================================================
+\section{Research Methodology}
+% ====================================================================
+
+\subsection{Technique Used}
+
+The proposed system integrates six complementary technical components to achieve
+high-accuracy, explainable, and cryptographically auditable healthcare fraud
+detection. These components are: (i) Optuna Bayesian hyperparameter optimisation
+with a Tree-structured Parzen Estimator sampler, (ii) SMOTE-ENN hybrid sampling
+for class imbalance analysis and ablation, (iii) the Elliptic Curve Integrated
+Encryption Scheme for PII protection, (iv) five machine learning classifiers
+encompassing gradient-boosted trees and ensemble methods, (v) a SHA-256 blockchain
+with Merkle tree integrity verification for audit trail storage, and (vi) the
+proposed eight-step end-to-end pipeline that orchestrates all of the above
+components. Each component is described in detail below.
+
+\begin{enumerate}[label=\roman*.]
+
+% ---- i. Optuna ----
+\item \textbf{Optuna Hyperparameter Optimisation.}
+Optuna is a define-by-run automatic hyperparameter optimisation framework that
+enables efficient search over high-dimensional, mixed-type parameter spaces
+\cite{akiba2019}. In the present study, Optuna is configured with the
+Tree-structured Parzen Estimator (TPE) sampler, which constructs two density
+estimates - one over hyperparameter configurations that yield high objective
+values and one over configurations that yield low objective values - and samples
+candidates that maximise the ratio of these densities. For each of the five
+classifiers, 60 Optuna trials are executed with a timeout of 1{,}800 seconds per
+model. The inner-loop objective function is the area under the precision-recall
+curve (AUC-PR) evaluated via 5-fold stratified cross-validation on the training
+partition, chosen in preference to ROC-AUC because AUC-PR is more informative
+under severe class imbalance. Each trial also includes a boolean hyperparameter
+controlling whether SMOTE-ENN oversampling is applied within the cross-validation
+pipeline, enabling the optimiser to discover the superior configuration for each
+classifier without requiring the researcher to pre-commit to a resampling
+strategy.
+
+% ---- ii. SMOTE-ENN ----
+\item \textbf{SMOTE-ENN for Class Imbalance.}
+SMOTE-ENN is a hybrid resampling algorithm that combines the Synthetic Minority
+Over-sampling Technique (SMOTE) with the Edited Nearest Neighbours (ENN) cleaning
+rule \cite{batista2004}. SMOTE generates synthetic minority-class samples by
+interpolating between existing minority instances in feature space, addressing
+the under-representation of fraudulent providers. ENN subsequently removes
+majority-class instances whose class label disagrees with the majority vote of
+their three nearest neighbours, thereby cleaning borderline and noisy samples
+from both classes and reducing class overlap. In the present pipeline,
+SMOTE-ENN is applied inside an \texttt{imblearn} pipeline so that the resampling
+occurs only on the training fold during cross-validation, preventing data leakage
+from synthetic samples into the validation fold. A central finding of the study
+is that, contrary to common assumptions, SMOTE-ENN consistently degrades
+performance by 6 to 10 percentage points in F1-score relative to the baseline
+cost-sensitive approach on this dataset, demonstrating that the
+\texttt{scale\_pos\_weight} mechanism native to gradient-boosted classifiers is
+a superior strategy for handling the 9.4 per cent fraud prevalence observed here.
+
+% ---- iii. ECIES ----
+\item \textbf{Elliptic Curve Integrated Encryption Scheme (ECIES).}
+ECIES is a hybrid public-key encryption scheme that combines asymmetric key
+agreement with symmetric authenticated encryption to provide both
+confidentiality and integrity for arbitrarily large payloads \cite{shoup2001}.
+The implementation in this study uses the secp256k1 elliptic curve for key
+generation and the Elliptic Curve Diffie-Hellman (ECDH) primitive for shared-
+secret derivation. The shared secret is processed through HKDF-SHA256 to derive
+a 256-bit symmetric key, which is then used with AES-256 in Galois/Counter Mode
+(AES-256-GCM) to encrypt the sensitive payload under a 96-bit random nonce. The
+ciphertext transmitted to the blockchain record consists of the sender's ephemeral
+compressed public key (33 bytes), the 12-byte nonce, the AES-GCM ciphertext, and
+the 16-byte authentication tag, concatenated and Base64-encoded. This construction
+ensures that provider PII such as beneficiary identifiers, diagnosis codes, and
+reimbursement amounts are rendered unreadable to any party that does not hold
+the designated private key, while the associated fraud score and Merkle hash
+remain visible for external audit purposes.
+
+% ---- iv. ML Classifiers ----
+\item \textbf{Machine Learning Classifiers.}
+
+Five supervised classifiers are evaluated in this study. Each is trained on the
+provider-level feature matrix of 5,410 observations with 190 features, using
+10-fold stratified cross-validation with Optuna-tuned hyperparameters.
+
+\textbf{XGBoost (eXtreme Gradient Boosting)} is a scalable, regularised gradient
+boosting framework that constructs an additive ensemble of decision trees by
+greedily minimising a differentiable loss function augmented with $L_1$ and $L_2$
+regularisation terms \cite{chen2016}. XGBoost supports native handling of class
+imbalance through the \texttt{scale\_pos\_weight} parameter, which up-weights the
+minority class in the loss function by a factor proportional to the class-
+frequency ratio. Tuned hyperparameters optimised in this study include the number
+of estimators (100 to 800), maximum tree depth (3 to 10), learning rate (0.01 to 0.3,
+log-uniform), subsample ratio, column subsampling ratio, minimum child weight,
+gamma regularisation, and the $L_1$ and $L_2$ regularisation coefficients.
+
+\textbf{LightGBM (Light Gradient Boosting Machine)} improves upon conventional
+gradient boosting through two key innovations: Gradient-based One-Side Sampling
+(GOSS), which retains instances with large gradients while randomly sampling
+those with small gradients to reduce training time, and Exclusive Feature Bundling
+(EFB), which merges mutually exclusive sparse features to reduce
+dimensionality \cite{ke2017}. LightGBM grows trees leaf-wise rather than
+level-wise, enabling deeper, more specialised splits with fewer iterations.
+Its native \texttt{is\_unbalance} and \texttt{scale\_pos\_weight} options provide
+flexible imbalance correction. In the Optuna search, the number of leaves, minimum
+child samples, feature fraction, bagging fraction, and regularisation terms are
+tuned alongside the core learning rate and estimator count.
+
+\textbf{CatBoost} is a gradient boosting library developed by Yandex that
+introduces ordered boosting to eliminate prediction shift caused by target
+leakage in categorical feature encoding \cite{prokhorenkova2018}. Rather than
+label-encoding categorical columns prior to training, CatBoost applies an
+online permutation-based statistic that prevents the model from seeing the
+target value of a sample during its own gradient computation. Although the
+provider-level features in this study are predominantly numeric after aggregation,
+CatBoost's symmetric tree structure and built-in overfitting detector make it a
+competitive baseline for the size of the dataset. The class imbalance is handled
+via the \texttt{auto\_class\_weights} parameter (with Balanced, SqrtBalanced, and
+None as candidate values), and the depth, learning rate, $L_2$ regularisation, and
+number of iterations are included in the Optuna search space.
+
+\textbf{Gradient Boosting Classifier} (scikit-learn implementation) applies the
+classical Friedman gradient boosting algorithm \cite{friedman2001}, fitting a
+fixed-depth regression tree to the negative gradient of the loss function at each
+stage. Unlike the later XGBoost and LightGBM variants, the scikit-learn
+implementation lacks native GPU acceleration and sophisticated leaf-pruning
+heuristics, but provides a well-validated baseline with straightforward
+hyperparameter interpretation. The class imbalance is addressed by passing
+\texttt{sample\_weight} arrays with weights proportional to the inverse class
+frequency. Tuned parameters include the number of estimators, maximum depth,
+learning rate, minimum samples per split, and the subsampling fraction.
+
+\textbf{Random Forest} is a bagging ensemble that trains a large number of
+decision trees on bootstrap replicates of the training data, selecting a random
+subset of features at each split node to decorrelate the individual trees
+\cite{breiman2001}. Prediction is made by majority vote (classification) or
+averaging (regression). Random Forest is particularly well suited to datasets
+with moderate sample sizes and many features because the bagging variance
+reduction complements the feature-subsampling bias reduction. Class imbalance is
+addressed by setting \texttt{class\_weight=`balanced\_subsample'}, which reweights
+samples by the inverse of their class frequency within each bootstrap subsample.
+The number of trees, maximum depth, minimum samples per leaf, and the feature
+subsampling fraction are included in the Optuna search.
+
+% Logistic Regression was evaluated in early experiments but excluded from the
+% final pipeline due to consistently lower performance on this dataset compared
+% to the five gradient-boosted and ensemble-based classifiers retained above.
+
+\paragraph{Cross-Validation Feature Computation.}
+All cross-provider features (z-score normalisations, percentile ranks, physician
+billing statistics, and network metrics) are computed within each
+cross-validation fold using only training-fold data, preventing information
+leakage from test providers.
+
+% ---- v. Blockchain ----
+\item \textbf{SHA-256 Blockchain with Merkle Trees.}
+The blockchain module implemented in this study uses SHA-256 cryptographic
+hashing, Merkle trees, and SQLite-backed persistence. Each
+block stores a batch of up to 50 fraud prediction records and records the
+SHA-256 hash of the concatenation of its own block index, timestamp, batch
+Merkle root, and the hash of the previous block, thereby forming a tamper-evident
+chain in which any alteration of a historical record invalidates all subsequent
+block hashes. The Merkle tree is computed bottom-up by hashing each record
+dictionary as a JSON string at the leaf level, then pairwise-hashing adjacent
+leaves until a single root digest is obtained. The Merkle root enables efficient
+inclusion proofs: to verify that a specific prediction record belongs to a given
+block, an auditor need only follow the $O(\log n)$ sibling hashes in the proof
+path rather than re-hashing all records in the block. Proof-of-work with
+adjustable difficulty (configurable leading zero count) further hardens the chain
+against retrospective modification. Chain validation traverses all blocks from
+genesis to the current tip, recomputing each block hash and Merkle root and
+verifying that hash linkage and proof-of-work constraints are satisfied, providing
+a complete integrity certificate for the audit trail.
+
+\paragraph{Design Rationale: Custom Blockchain.}
+The custom Python blockchain is chosen over enterprise frameworks such as Hyperledger Fabric and Ethereum for three reasons. First, \emph{transparency}: every cryptographic operation --- SHA-256 hashing, Merkle proof construction, ECIES encryption --- is implemented in the source code and can be inspected, modified, and explained at the implementation level. Second, \emph{reproducibility}: the system runs on any machine with Python and SQLite, requiring no Docker infrastructure, Go chaincode compilation, or certificate authority configuration. Third, \emph{research focus}: the thesis contribution is the integration of blockchain audit trails with an ML fraud detection pipeline, not the blockchain infrastructure itself. A production deployment would use Hyperledger Fabric for multi-organisation consensus and enterprise-grade access control, as discussed in Section~5.4 (Future Work).
+
+\paragraph{Proof-of-Work Difficulty.}
+The PoW difficulty parameter is set to 2 (block hashes must begin with two leading zero hex digits), corresponding to approximately 256 hash attempts on average. This level is calibrated for audit-trail integrity verification rather than adversarial mining resistance. The complete 110-block chain builds in 7.0 seconds (1.3\,ms per record), well within real-time audit requirements. Higher difficulty values provide no additional security benefit in a single-node research context; a distributed deployment would adopt committee-based consensus (e.g., PBFT or Raft) instead.
+
+\paragraph{Threat Model.}
+The blockchain component addresses three specific threats:
+\begin{enumerate}[nosep]
+\item \textbf{Post-hoc record tampering}: an unauthorised party modifies a stored fraud score after the fact. Mitigated by SHA-256 hash chaining and Merkle proofs, which make any modification detectable through chain revalidation.
+\item \textbf{PII exposure}: an unauthorised party reads provider identity from the audit trail. Mitigated by ECIES field-level encryption; only holders of the designated private key can recover plaintext provider identifiers.
+\item \textbf{Repudiation}: an investigator denies having flagged a provider. Mitigated by timestamped, hash-linked audit entries that provide a non-repudiable record of every prediction event.
+\end{enumerate}
+Byzantine fault tolerance, Sybil attacks, and 51\% mining attacks are explicitly out of scope for this single-node research prototype and are listed as future work in Section~5.4.
+
+\end{enumerate}
+
+\subsubsection{Design Decisions and Rationale}
+Table~\ref{tab:design} summarises the key design decisions, the alternatives considered, and the rationale for each choice. Every selection is motivated by either empirical evidence from the experiments, alignment with best practices in the literature, or practical constraints of the research setting.
+
+\begin{longtable}{p{2.8cm} p{3cm} p{2.8cm} p{5cm}}
+\caption{Design decisions and rationale for key architectural choices.} \label{tab:design} \\
+\toprule
+\textbf{Category} & \textbf{Choice} & \textbf{Alternatives} & \textbf{Rationale} \\
+\midrule
+\endfirsthead
+\multicolumn{4}{l}{\textit{Table~\ref{tab:design} continued}} \\
+\toprule
+\textbf{Category} & \textbf{Choice} & \textbf{Alternatives} & \textbf{Rationale} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Language & Python 3.10 & R, Java, Scala & Richest ML ecosystem (scikit-learn, XGBoost, SHAP); native integration with blockchain module \\
+Dataset & Kaggle rohitrox & Real CMS, synthetic & Publicly available; peer-benchmarkable; real Medicare claims structure \\
+Aggregation & Provider-level & Claim-level & Fraud labels exist at provider level; claim-level requires label propagation \\
+Features & 190 engineered & 52 core subset & Ablation study (Table~4.6) confirms full set outperforms all subsets \\
+Classifiers & 5 tree-based & SVM, KNN, MLP & Gradient boosting dominates tabular benchmarks; LogReg excluded after Optuna showed lowest AUC-PR \\
+Ensemble & Optuna-weighted & Stacking, average & AUC-PR-optimised weights; stacking overfits with only 5 base models \\
+HPO framework & Optuna TPE & Grid, random search & TPE converges faster on mixed-type spaces (60 trials per model) \\
+CV strategy & 10-fold stratified & 5-fold, holdout & 10 folds yield 10 paired samples for Wilcoxon; stratification preserves 9.4\% fraud rate \\
+Imbalance & Native class weighting & SMOTE-ENN, ADASYN & Empirical: SMOTE degrades F1 by 7--10\% (Table~4.5) \\
+Primary metric & F1-score & Accuracy, AUC-ROC & Accuracy misleading at 90.6\% class prior; F1 balances precision and recall \\
+Threshold & $t = 0.444$ & $t = 0.5$ & Validation-optimal; fixed for all downstream evaluation \\
+Blockchain & Custom SHA-256 & Hyperledger, Ethereum & Cryptographic transparency; no Docker/Go dependency; reproducible \\
+Hash function & SHA-256 & SHA-3, Blake2 & NIST standard; Bitcoin/TLS compatibility; widest library support \\
+Encryption & ECIES (secp256k1) & RSA, secp256r1 & Bitcoin-compatible curve; authenticated encryption without separate signing \\
+KDF & HKDF-SHA256 & PBKDF2, scrypt & HKDF designed for ECDH shared secrets (RFC~5869); PBKDF2 for passwords \\
+Symmetric cipher & AES-256-GCM & AES-CBC, ChaCha20 & GCM provides authenticated encryption in single pass; CBC needs separate HMAC \\
+Merkle tree & Binary SHA-256 & Patricia, Verkle & Simplest; sufficient for batch verification; Patricia for key-value state only \\
+PoW difficulty & 2 & Higher & Audit-trail integrity, not adversarial resistance; 7\,s for 110 blocks \\
+Block size & 50 records & Dynamic & Balances Merkle depth (6 levels) with mining frequency \\
+Persistence & SQLite & PostgreSQL, LevelDB & Zero-configuration, ACID-compliant, single-file portability \\
+Web framework & Flask & Django, FastAPI & Lightweight Jinja2 templates; Django overhead unnecessary \\
+Explainability & SHAP + LIME & SHAP only & Dual methods cross-validate attributions (global + local) \\
+Statistical tests & Friedman + Wilcoxon & $t$-test, ANOVA & Non-parametric; no normality assumption on fold F1 distributions \\
+Bootstrap & 2000 iterations & 1000, 5000 & Stable 95\% CI; diminishing returns beyond 2000 \\
+Feature selection & All 190 & Top-$K$, PCA, RFE & Full set outperforms subsets; trees handle redundancy via subsampling \\
+\end{longtable}
+
+% ---- vi. Proposed Methodology / Flowchart ----
+\subsubsection{Pipeline Flowchart}
+
+The proposed eight-step end-to-end pipeline is illustrated in Figure
+\ref{fig:pipeline_flowchart}. The pipeline proceeds sequentially from raw data
+ingestion through to blockchain-backed prediction storage, with the Optuna
+hyperparameter optimisation loop embedded between the preprocessing and training
+stages.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.8cm and 0.5cm,
+    box/.style={
+      rectangle, rounded corners=4pt, draw=black, thick,
+      minimum width=5.2cm, minimum height=0.7cm,
+      text centered, font=\small\bfseries, fill=gray!12
+    },
+    arrow/.style={->, thick, >=stealth, color=gray!70}
+  ]
+  % Row 1 (left to right)
+  \node[box, fill=green!12] (step1) {Step 1: Data Collection};
+  \node[box, fill=green!12, right=of step1] (step2) {Step 2: ECIES Encryption};
+
+  % Row 2 (right to left)
+  \node[box, fill=red!8, below=of step2] (step3) {Step 3: Blockchain Storage};
+  \node[box, fill=blue!10, below=of step1] (step4) {Step 4: Preprocessing};
+
+  % Row 3 (left to right)
+  \node[box, fill=orange!12, below=of step4] (step5) {Step 5: Optuna HPO};
+  \node[box, fill=orange!12, right=of step5] (step6) {Step 6: ML Training (10-CV)};
+
+  % Row 4 (right to left)
+  \node[box, fill=yellow!15, below=of step6] (step7) {Step 7: Threshold Opt.};
+  \node[box, fill=yellow!15, below=of step5] (step8) {Step 8: Evaluation + SHAP};
+
+  % Snake arrows
+  \draw[arrow] (step1) -- (step2);
+  \draw[arrow] (step2) -- (step3);
+  \draw[arrow] (step3) -- (step4);
+  \draw[arrow] (step4) -- (step5);
+  \draw[arrow] (step5) -- (step6);
+  \draw[arrow] (step6) -- (step7);
+  \draw[arrow] (step7) -- (step8);
+
+\end{tikzpicture}
+\caption{End-to-end eight-step pipeline for ML-based healthcare fraud detection
+with ECIES encryption and SHA-256 blockchain audit trail. The snake layout shows
+the sequential flow through data ingestion and encryption (green), blockchain
+storage (red), preprocessing (blue), model training and tuning (orange), and
+evaluation (yellow) stages.}
+\label{fig:pipeline_flowchart}
+\end{figure}
+
+\noindent The following subsections describe each step in detail.
+
+\vspace{0.5em}
+\noindent\textbf{Step 1: Data Collection.}
+
+\begin{enumerate}[label=\roman*.]
+  \item The four raw CSV files from the Kaggle rohitrox Healthcare Provider Fraud
+  Detection Analysis dataset are downloaded and verified. The files are
+  \texttt{Train.csv} (5,410 provider-level fraud labels),
+  \texttt{Train\_Beneficiarydata} (138,556 beneficiary demographic records),
+  \texttt{Train\_Inpatientdata} (40,474 inpatient claims), and
+  \texttt{Train\_Outpatientdata} (517,737 outpatient claims).
+  \item The inpatient and outpatient tables are outer-joined on their common
+  columns to produce a unified claims table of 558,211 records, with an
+  \texttt{is\_inpatient} indicator column distinguishing the two claim types.
+  \item The claims table is then left-joined with the beneficiary demographic
+  table on \texttt{BeneID} and subsequently with the provider fraud labels on
+  \texttt{Provider}, yielding the complete claim-level dataset from which all
+  downstream features are derived.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\textbf{Step 2: ECIES Encryption.}
+
+\begin{enumerate}[label=\roman*.]
+  \item A secp256k1 key pair is generated for the audit authority. The public key
+  is used to encrypt sensitive fields; the private key is held offline by the
+  audit authority and never stored in the pipeline artefacts.
+  \item For each provider record scheduled for blockchain storage, the personally
+  identifiable fields - including beneficiary identifiers, attending physician
+  codes, and raw reimbursement amounts - are serialised to JSON and encrypted
+  under the audit authority's public key using the ECIES scheme described in
+  Section 3.5(iii).
+  \item The encrypted ciphertext blob and its HKDF-derived key material are stored
+  in the blockchain record alongside the plaintext fraud score and provider
+  pseudonym, ensuring that the audit log is fully queryable by fraud score while
+  sensitive PII remains inaccessible without the private key.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\textbf{Step 3: SHA-256 Blockchain Storage.}
+
+\begin{enumerate}[label=\roman*.]
+  \item Provider fraud prediction records, each containing the provider
+  pseudonym, fraud probability, binary prediction, and ECIES-encrypted PII,
+  are batched into groups of up to 50 records per block.
+  \item For each batch, a SHA-256 Merkle root is computed from the JSON
+  serialisations of the individual records, and the block header is constructed
+  by concatenating the block index, Unix timestamp, Merkle root, and previous
+  block hash, then hashing this header with SHA-256 to produce the block hash.
+  \item Proof-of-work mining iterates a nonce field until the block hash satisfies
+  the configured difficulty constraint (a prescribed number of leading zero hex
+  digits), and the completed block is appended to the SQLite-backed chain. Chain
+  validity is confirmed after each insertion by re-traversing the full chain.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\textbf{Step 4: Preprocessing and Feature Engineering.}
+
+\begin{enumerate}[label=\roman*.]
+  \item Date columns (\texttt{ClaimStartDt}, \texttt{ClaimEndDt},
+  \texttt{AdmissionDt}, \texttt{DischargeDt}, \texttt{DOB}, \texttt{DOD}) are
+  parsed and used to compute derived numeric quantities: claim duration in days,
+  inpatient length of stay, and beneficiary age at the time of each claim.
+  Deceased beneficiary status is derived from the presence of a non-null
+  \texttt{DOD} value.
+  \item Provider-level aggregation computes, for each of the 5,410 providers,
+  statistics including total claim count, unique beneficiary count, unique
+  physician count, unique diagnosis code count, total and maximum reimbursement
+  amounts, total deductible paid, mean claim duration, the proportion of inpatient
+  claims, the mean and maximum patient age, the dead-patient ratio (deceased
+  beneficiaries divided by total unique beneficiaries), and the mean count of
+  chronic conditions per beneficiary.
+  \item Infinite values introduced by division operations are replaced with
+  \texttt{NaN} and subsequently imputed with column medians; all 190 resulting
+  features are verified to contain no remaining missing values before further
+  processing.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\textbf{Step 5: Optuna Hyperparameter Optimisation.}
+
+\begin{enumerate}[label=\roman*.]
+  \item For each of the five classifiers, an Optuna \texttt{Study} object is
+  created with a \texttt{TPESampler} seeded at 42 and a
+  \texttt{MedianPruner} that terminates unpromising trials early based on
+  intermediate AUC-PR values reported at each inner cross-validation fold.
+  \item The objective function evaluates each hyperparameter configuration via
+  5-fold stratified cross-validation using the \texttt{average\_precision\_score}
+  as the metric, with the complete pipeline - including optional SMOTE-ENN
+  resampling controlled by a boolean trial parameter - encapsulated in an
+  \texttt{imblearn} pipeline to prevent data leakage.
+  \item After 60 trials or 1{,}800 seconds (whichever is reached first), the
+  best trial's hyperparameters and the optimal SMOTE-ENN decision are serialised
+  to \texttt{results/best\_params.json} for reproducible reuse in Phase 5.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\textbf{Step 6: ML Ensemble Classifier (10-fold CV).}
+
+\begin{enumerate}[label=\roman*.]
+  \item Each classifier is instantiated with the Optuna-tuned hyperparameters
+  loaded from \texttt{best\_params.json} and evaluated under 10-fold stratified
+  cross-validation, ensuring that the fraud-to-non-fraud ratio is maintained in
+  every fold.
+  \item The held-out fold predictions are aggregated to produce out-of-fold
+  probability scores for all 5,410 providers, from which the macro-averaged F1,
+  precision, recall, AUC-PR, MCC, and ROC-AUC are computed with 95\% confidence
+  intervals derived from 1{,}000 bootstrap resamples.
+  \item In addition to the five individual classifiers, an Optuna-weighted
+  ensemble combining XGBoost, LightGBM, and CatBoost with optimised model
+  weights is evaluated in the same cross-validation framework, quantifying
+  the additional predictive gain achievable by combining the base classifiers.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\textbf{Step 7: Threshold Optimisation.}
+
+\begin{enumerate}[label=\roman*.]
+  \item The precision-recall curve is computed from the out-of-fold probability
+  scores of the best-performing classifier (Optuna-tuned XGBoost) using the
+  \texttt{precision\_recall\_curve} function from scikit-learn.
+  \item For each candidate threshold value along the curve, the F1-score is
+  computed as the harmonic mean of precision and recall at that operating point,
+  and the threshold that maximises F1 is reported for reference.
+  \item For the final binary predictions, a fixed classification threshold of
+  $t = 0.444$ is applied to convert probability outputs, ensuring consistent
+  evaluation across all folds without threshold overfitting.
+\end{enumerate}
+
+\vspace{0.5em}
+\noindent\textbf{Step 8: Performance Evaluation and Explainability.}
+
+\begin{enumerate}[label=\roman*.]
+  \item The full evaluation suite reports F1-score, precision, recall, AUC-PR,
+  MCC, and ROC-AUC for all five classifiers and their SMOTE-ENN ablations, with
+  bootstrap confidence intervals, paired Wilcoxon signed-rank tests for
+  statistical significance, and confusion matrices.
+  \item Global feature importance is visualised using SHAP beeswarm and bar plots
+  computed from the Optuna-tuned XGBoost model, identifying deductible payment
+  patterns, maximum reimbursement amounts, and claim duration anomalies as the
+  strongest fraud indicators at the population level.
+  \item Local per-provider explanations are generated with LIME using a tabular
+  explainer with 500 perturbation samples per instance, providing human-readable
+  feature contribution summaries for each flagged provider that are suitable for
+  inclusion in regulatory audit reports.
+\end{enumerate}

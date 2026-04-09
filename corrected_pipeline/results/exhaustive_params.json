@@ -1,0 +1,92 @@
+{
+  "XGBoost": {
+    "params": {
+      "n_estimators": 1170,
+      "max_depth": 4,
+      "learning_rate": 0.00905964388014702,
+      "subsample": 0.8518981258315188,
+      "colsample_bytree": 0.8001485849247003,
+      "reg_alpha": 0.055352536121744025,
+      "reg_lambda": 0.05949972547904027,
+      "min_child_weight": 1,
+      "gamma": 4.263641858538205e-06,
+      "scale_pos_weight": 0.6268567747572766
+    },
+    "best_aucpr": 0.8094402468525924,
+    "n_trials": 100,
+    "time_seconds": 672.8854098320007
+  },
+  "LightGBM": {
+    "params": {
+      "n_estimators": 723,
+      "max_depth": 9,
+      "learning_rate": 0.03414156379583826,
+      "num_leaves": 116,
+      "min_child_samples": 40,
+      "subsample": 0.9582524521890712,
+      "colsample_bytree": 0.6111008254572483,
+      "reg_alpha": 0.8082353672888312,
+      "reg_lambda": 0.0006611001482649519,
+      "balance": "is_unbalance",
+      "boosting_type": "gbdt"
+    },
+    "best_aucpr": 0.814818934390731,
+    "n_trials": 100,
+    "time_seconds": 630.3132827281952
+  },
+  "CatBoost": {
+    "params": {
+      "iterations": 1097,
+      "depth": 5,
+      "learning_rate": 0.016270876652691037,
+      "l2_leaf_reg": 29.43311709352882,
+      "random_strength": 2.0315648829330293,
+      "bagging_temperature": 0.9543197541403883,
+      "border_count": 82,
+      "auto_class_weights": "None"
+    },
+    "best_aucpr": 0.8140246518305622,
+    "n_trials": 100,
+    "time_seconds": 895.9149935245514
+  },
+  "GradientBoosting": {
+    "params": {
+      "n_estimators": 828,
+      "max_depth": 4,
+      "learning_rate": 0.00452133073914088,
+      "subsample": 0.8421165132560784,
+      "max_features": 0.4961372443656412,
+      "min_samples_split": 6,
+      "min_samples_leaf": 13
+    },
+    "best_aucpr": 0.8048327916828434,
+    "n_trials": 6,
+    "time_seconds": 947.4797620773315
+  },
+  "RandomForest": {
+    "params": {
+      "n_estimators": 221,
+      "max_depth": 17,
+      "min_samples_split": 5,
+      "min_samples_leaf": 14,
+      "max_features": 0.7,
+      "class_weight": "balanced_subsample"
+    },
+    "best_aucpr": 0.7772044304630145,
+    "n_trials": 100,
+    "time_seconds": 728.7569139003754
+  },
+  "ExtraTrees": {
+    "params": {
+      "n_estimators": 414,
+      "max_depth": 22,
+      "min_samples_split": 12,
+      "min_samples_leaf": 5,
+      "max_features": 0.5,
+      "class_weight": "balanced_subsample"
+    },
+    "best_aucpr": 0.7629554801409781,
+    "n_trials": 100,
+    "time_seconds": 310.0589745044708
+  }
+}

@@ -1,0 +1,676 @@
+\chapter{Results and Discussion}
+
+% ====================================================================
+\section{Overview}
+% ====================================================================
+
+This chapter presents the evaluation of the HealthFraudMLChain
+pipeline, covering every stage from raw data ingestion and blockchain
+registration through hyperparameter optimisation, model selection, statistical
+validation, and post-hoc explainability. All numerical results reported here
+are drawn directly from controlled experiments on the CMS Medicare Part-B
+dataset (190 engineered features, 5{,}410 provider records). Section 4.2
+discusses each sub-system in turn: the Flask dashboard and blockchain layer,
+Optuna-driven tuning, 10-fold cross-validation metrics, statistical significance
+tests, threshold calibration, bootstrap confidence intervals, SMOTE-ENN
+ablation, feature importance, SHAP waterfall case studies, LIME local
+explanations, feature-selection ablation, learning curves, and calibration
+analysis. A key finding is that the weighted ensemble of gradient-boosted
+models, evaluated at a fixed decision threshold of $t = 0.444$, achieves
+the best overall generalisation, with a bootstrapped PR-AUC of
+$0.8115\;[0.7801,\,0.8406]$ and MCC of $0.7148\;[0.6818,\,0.7474]$.
+
+% ====================================================================
+\section{Results Analysis}
+% ====================================================================
+
+% --------------------------------------------------------------------
+\subsection{Data Input and Blockchain Results}
+% --------------------------------------------------------------------
+
+The system exposes a Flask-based web dashboard that serves two primary
+interfaces: a \emph{prediction interface} for submitting individual or
+batch provider records, and an \emph{analytics dashboard} displaying
+aggregate statistics, risk-level breakdowns, and chain-health indicators.
+On submission, a provider record is passed through the trained weighted
+ensemble; the returned \texttt{fraud\_probability} and \texttt{risk\_level}
+(\textit{Low}/\textit{Medium}/\textit{High}) are then committed to an
+append-only blockchain.
+
+Each block in the chain stores the provider identifier under ECIES
+(Elliptic-Curve Integrated Encryption Scheme) public-key encryption,
+ensuring that personally identifiable information is never stored in
+plaintext. The chain uses SHA-256 hashing with Proof-of-Work at
+difficulty level 2, and every block records its own \texttt{hash} and
+the previous block's hash to maintain tamper-evidence. A Merkle tree is
+constructed over each block's transaction set, with the root digest
+stored as \texttt{merkle\_root}; membership proofs are verified in
+$O(\log n)$ time across 6 levels.
+
+Listing~\ref{lst:block} shows a representative JSON block from the
+persisted chain, illustrating the full field layout.
+
+\vspace{0.5em}
+\noindent
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[
+  caption={Sample blockchain block - provider prediction record},
+  label={lst:block},
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  aboveskip=0.5em,
+  belowskip=0.5em
+]
+{
+  "index": 42,
+  "timestamp": "2024-12-01T10:23:45.123456",
+  "provider_id": "BIIyNkF3...encryptedECIES...==",
+  "fraud_probability": 0.7843,
+  "prediction": 1,
+  "risk_level": "High",
+  "previous_hash": "0082a3f1e9c4b...sha256...",
+  "nonce": 178,
+  "merkle_root": "a1b2c3d4e5f6...sha256...",
+  "hash": "009fe2cc71bd...sha256...",
+  "transactions": [{
+    "provider_id_encrypted": "BIIyNkF3...==",
+    "fraud_probability": 0.7843,
+    "prediction": 1,
+    "risk_level": "High",
+    "timestamp": "2024-12-01T10:23:45.123456"
+  }]
+}
+\end{lstlisting}
+\end{minipage}
+
+The final chain comprised 110 blocks covering all 5{,}410 provider
+records. Full verification results are detailed in
+Section~\ref{sec:blockchain_verification}.
+
+% --------------------------------------------------------------------
+\subsection{Optuna Hyperparameter Optimisation}
+% --------------------------------------------------------------------
+
+Hyperparameters were tuned using the Optuna framework with 60 trials per
+model (except LightGBM, which triggered early pruning and completed only
+1 effective trial), a 5-fold inner cross-validation loop, and
+Area Under the Precision-Recall Curve (AUC-PR) as the objective. No
+SMOTE oversampling was applied during the tuning phase. The complete
+tuning summary is reported in Table~\ref{tab:optuna}.
+
+\begin{table}[H]
+\caption{Optuna hyperparameter optimisation results (60 trials, 5-fold
+inner CV, AUC-PR objective, no SMOTE).}
+\label{tab:optuna}
+\centering
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{Best AUC-PR} & \textbf{Trials} &
+\textbf{SMOTE} & \textbf{Wall Time (s)} \\
+\midrule
+CatBoost            & 0.7599 & 60 & No & 422  \\
+GradientBoosting    & 0.7597 & 60 & No & 1137 \\
+XGBoost             & 0.7572 & 60 & No & 236  \\
+LightGBM            & 0.7480 &  1 & No & 3716 \\
+RandomForest        & 0.7397 & 60 & No & 225  \\
+LogisticRegression  & 0.7261 & 60 & No & 260  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+CatBoost achieved the highest inner-CV AUC-PR of 0.7599, marginally
+ahead of GradientBoosting (0.7597) and XGBoost (0.7572). LightGBM's
+Optuna run terminated early due to aggressive pruning, yielding only a
+single completed trial; despite this, the pruned configuration still
+attained 0.7480. LogisticRegression, as expected for a linear model on
+this data, posted the lowest tuning score of 0.7261. The tuning
+wall-times reveal an important practical trade-off: XGBoost (236 s) and
+RandomForest (225 s) are substantially faster to optimise than
+GradientBoosting (1137 s) or LightGBM (3716 s), making them preferable
+in resource-constrained production environments.
+
+% --------------------------------------------------------------------
+\subsection{Model Analysis and Performance Evaluation}
+% --------------------------------------------------------------------
+
+Following tuning, the five tree-based models were carried forward for
+full 10-fold stratified cross-validation (LogisticRegression was excluded
+from downstream evaluation due to its substantially lower tuning score).
+A weighted ensemble combining these five base models was also evaluated.
+Table~\ref{tab:cv} reports the mean F1-score across all ten folds.
+
+\begin{table}[H]
+\caption{Ten-fold stratified cross-validation results: mean F1-score
+for all model configurations (tuned, no SMOTE).}
+\label{tab:cv}
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Model} & \textbf{F1 (mean)} & \textbf{F1 (std)} \\
+\midrule
+WeightedEnsemble     & \textbf{0.7689} & 0.0334 \\
+XGBoost              & 0.7350 & 0.0475 \\
+LightGBM             & 0.7319 & 0.0274 \\
+CatBoost             & 0.7249 & 0.0558 \\
+GradientBoosting     & 0.7133 & 0.0554 \\
+RandomForest         & 0.5860 & 0.0531 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The weighted ensemble achieves the highest F1 of 0.7689, followed by
+XGBoost (0.7350), LightGBM (0.7319), CatBoost (0.7249), and
+GradientBoosting (0.7133). RandomForest lags substantially behind the
+other models at F1~=~0.5860, suggesting that its bagging strategy is
+less effective than boosting approaches on this dataset. Among the
+individual models, XGBoost, LightGBM, and CatBoost form a competitive
+tier separated by less than one percentage point of F1, while
+GradientBoosting trails by roughly two points. The weighted ensemble
+combines complementary strengths across these models to achieve the
+best overall performance.
+Figure~\ref{fig:model_comparison} provides a visual summary of the F1-scores across all models.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{fig_model_comparison.png}
+\caption{Model comparison: F1-scores across all model configurations.}
+\label{fig:model_comparison}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.6\textwidth]{fig_confusion_matrix.png}
+\caption{Confusion matrix for the weighted ensemble at fixed threshold $t = 0.444$.}
+\label{fig:confusion_matrix}
+\end{figure}
+
+
+% --------------------------------------------------------------------
+\subsection{Statistical Significance}
+\label{sec:stats}
+% --------------------------------------------------------------------
+
+To validate that observed performance differences are not attributable
+to random variation across folds, a non-parametric Friedman test was
+applied over the per-fold F1 scores of all six model configurations
+(five base models plus the weighted ensemble).
+The test returned $\chi^2 = 18.72$ with $p < 0.001$, rejecting
+the null hypothesis that all models perform identically.
+
+Post-hoc pairwise Wilcoxon signed-rank tests (with Holm-Bonferroni
+correction) were then conducted with the weighted ensemble as the
+reference model. The ensemble was found to be statistically
+significantly better than:
+
+\begin{itemize}[nosep]
+  \item LightGBM ($p = 0.010$)
+  \item GradientBoosting ($p = 0.010$)
+  \item RandomForest ($p = 0.010$)
+  \item XGBoost ($p = 0.010$)
+  \item CatBoost ($p = 0.014$)
+\end{itemize}
+
+All five base models show statistically significant differences from
+the weighted ensemble after Holm-Bonferroni correction, confirming
+that the ensemble's improved F1 is not attributable to chance.
+Figure~\ref{fig:stat_sig} visualises the adjusted p-values for all pairwise comparisons.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{fig_statistical_significance.png}
+\caption{Pairwise Wilcoxon signed-rank test results with Holm-Bonferroni correction. Green bars indicate statistically significant differences ($p < 0.05$).}
+\label{fig:stat_sig}
+\end{figure}
+
+
+% --------------------------------------------------------------------
+\subsection{Threshold Optimisation}
+% --------------------------------------------------------------------
+
+The decision threshold was selected by optimising F1 on the validation
+folds and then fixed at $t = 0.444$ for all downstream evaluation.
+Table~\ref{tab:threshold} reports the weighted ensemble classification
+metrics at this threshold.
+
+\begin{table}[H]
+\caption{Weighted ensemble classification metrics at fixed threshold $t = 0.444$.}
+\label{tab:threshold}
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Threshold} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} \\
+\midrule
+0.444 (fixed)   & 0.7345 & 0.7368 & 0.7470 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Fixing the threshold at the validation-optimal value of 0.444, rather
+than the default 0.5, yields a slight recall improvement while
+maintaining precision. This threshold was adopted for all downstream
+bootstrap and calibration analyses.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.80\textwidth]{fig_threshold_sensitivity.png}
+  \caption{Threshold sensitivity curve for the weighted ensemble: F1,
+  Precision, and Recall as a function of decision threshold. The
+  vertical dashed line marks the fixed threshold at $t = 0.444$.}
+  \label{fig:threshold}
+\end{figure}
+
+% --------------------------------------------------------------------
+\subsection{Bootstrap Confidence Intervals}
+% --------------------------------------------------------------------
+
+To quantify estimation uncertainty, a stratified bootstrap with
+$n = 2{,}000$ resamples was applied to the weighted ensemble's test-set
+predictions at the fixed threshold $t = 0.444$. The resulting 95\%
+confidence intervals are reported in Table~\ref{tab:bootstrap}.
+
+\begin{table}[H]
+\caption{Bootstrap confidence intervals for the weighted ensemble at
+fixed threshold $t = 0.444$ ($n = 2{,}000$ resamples, 95\% CI).}
+\label{tab:bootstrap}
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Point Estimate} &
+\textbf{95\% CI Lower} & \textbf{95\% CI Upper} \\
+\midrule
+F1         & 0.7416 & 0.7118 & 0.7715 \\
+Precision  & 0.7369 & 0.6985 & 0.7750 \\
+Recall     & 0.7467 & 0.7094 & 0.7839 \\
+MCC        & 0.7148 & 0.6818 & 0.7474 \\
+ROC-AUC    & 0.9586 & 0.9477 & 0.9686 \\
+PR-AUC     & 0.8115 & 0.7801 & 0.8406 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All confidence intervals are reasonably narrow, reflecting stable
+generalisation. The ROC-AUC of $0.9586\;[0.9477,\,0.9686]$ confirms
+strong discriminative power across the full threshold range, while
+the PR-AUC of $0.8115\;[0.7801,\,0.8406]$ is particularly informative
+given the class imbalance: a random classifier would score near the
+minority-class prevalence ($\approx 0.094$), so 0.8115 represents a
+substantial lift of more than eight times the baseline. The bootstrapped
+MCC of $0.7148\;[0.6818,\,0.7474]$ corroborates the F1-based findings
+without being susceptible to the known sensitivity of F1 to class
+imbalance.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.75\textwidth]{fig_bootstrap_ci.png}
+\caption{Bootstrap 95\% confidence intervals for the weighted ensemble (2,000 iterations, fixed threshold $t=0.444$).}
+\label{fig:bootstrap_ci}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.65\textwidth]{fig_pr_curve.png}
+\caption{Precision-recall curve for the weighted ensemble (PR-AUC = 0.8114). The operating point at fixed threshold $t = 0.444$ achieves precision = 0.737 and recall = 0.747. The baseline precision (dashed) corresponds to the fraud prevalence of 9.4\%.}
+\label{fig:pr_curve}
+\end{figure}
+
+% --------------------------------------------------------------------
+\subsection{SMOTE-ENN Ablation Study}
+% --------------------------------------------------------------------
+
+To isolate the effect of synthetic oversampling, XGBoost, LightGBM, and
+GradientBoosting were each re-evaluated under two conditions: with
+SMOTE-ENN applied inside each training fold, and without. Table~\ref{tab:smote}
+summarises the F1 outcome.
+
+\begin{table}[H]
+\caption{SMOTE-ENN ablation: F1 scores with and without oversampling
+(10-fold CV, tuned models).}
+\label{tab:smote}
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{With SMOTE-ENN} & \textbf{No SMOTE} &
+\textbf{Change} \\
+\midrule
+XGBoost          & 0.6639 & \textbf{0.7350} & $-9.7\%$ \\
+LightGBM         & 0.6815 & \textbf{0.7319} & $-6.9\%$  \\
+GradientBoosting & 0.6528 & \textbf{0.7133} & $-8.5\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Across all three tree-based ensembles, SMOTE-ENN oversampling
+consistently \emph{degrades} F1 - by 9.7\% for XGBoost, 8.5\% for
+GradientBoosting, and 6.9\% for LightGBM. This counter-intuitive result
+is well documented in the literature for gradient-boosted trees: the
+native loss-weighted splitting in XGBoost (via \texttt{scale\_pos\_weight})
+and the analogue mechanisms in LightGBM and GradientBoosting already
+account for class imbalance. Introducing SMOTE-ENN on top of these
+mechanisms injects synthetic minority-class samples into the training
+distribution, distorting the decision boundary and inflating recall
+while degrading precision. The net effect is a lower F1 and, more
+critically, an inflated false-positive rate that would be operationally
+costly in a claims-audit workflow. Figure~\ref{fig:smote_abl} illustrates this finding. Consequently, no oversampling is used
+in the final deployed pipeline.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.82\textwidth]{fig_smote_ablation.png}
+\caption{SMOTE-ENN ablation: F1-score comparison with and without synthetic oversampling for three gradient-boosted models. Delta percentages indicate the performance penalty introduced by SMOTE-ENN.}
+\label{fig:smote_abl}
+\end{figure}
+
+% --------------------------------------------------------------------
+\subsection{Feature Importance Ranking}
+% --------------------------------------------------------------------
+
+Feature importance was assessed through two complementary approaches:
+SHAP (SHapley Additive exPlanations) values, which provide
+theoretically grounded attribution based on cooperative game theory,
+and permutation importance, which measures the drop in performance
+when each feature's values are randomly shuffled.
+
+Figure~\ref{fig:shap_beeswarm} presents the SHAP beeswarm plot for the
+tuned XGBoost model, displaying the distribution of SHAP values for the
+top 20 features across all test instances. Each point represents one
+provider, coloured by feature value (red = high, blue = low).
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.90\textwidth]{fig_shap_beeswarm_tuned.png}
+  \caption{SHAP beeswarm plot (XGBoost): distribution of SHAP
+  values for the top 20 features across all test-set providers. Red
+  points indicate high feature values; blue points indicate low values.}
+  \label{fig:shap_beeswarm}
+\end{figure}
+
+Figure~\ref{fig:shap_bar} shows the mean absolute SHAP values (global
+importance ranking) in a bar chart, providing a concise summary of
+which features drive model predictions most strongly.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_shap_bar_tuned.png}
+  \caption{SHAP global feature importance (XGBoost): mean
+  absolute SHAP values ranked in descending order.}
+  \label{fig:shap_bar}
+\end{figure}
+
+Figure~\ref{fig:shap_dep} presents SHAP dependence plots for the four
+most important features, illustrating how the model's output changes
+as each feature varies, with interaction effects encoded by the
+secondary colour axis.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.95\textwidth]{fig_shap_dependence_tuned.png}
+  \caption{SHAP dependence plots for the top-4 features (XGBoost).
+  Colour represents the value of the strongest interaction
+  feature identified by SHAP.}
+  \label{fig:shap_dep}
+\end{figure}
+
+Figure~\ref{fig:perm_imp} shows permutation importance, confirming the
+SHAP-derived ranking through a model-agnostic lens and providing
+error bars over 10 shuffling repetitions.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_permutation_importance.png}
+  \caption{Permutation feature importance (XGBoost): mean
+  decrease in F1 when each feature is randomly permuted, with
+  error bars over 10 repetitions.}
+  \label{fig:perm_imp}
+\end{figure}
+
+% --------------------------------------------------------------------
+\subsection{SHAP Waterfall Case Studies}
+% --------------------------------------------------------------------
+
+To illustrate how the model reasons about individual providers, SHAP
+waterfall plots were generated for three clinically meaningful cases: a
+true positive (TP), a false positive (FP), and a false negative (FN).
+Each waterfall chart decomposes the gap between the model's base value
+and the final prediction into additive feature contributions.
+
+Figure~\ref{fig:wf_tp} shows the true-positive case, where the model
+correctly identifies a fraudulent provider. The dominant positive
+contributions align with the globally important features identified in
+Section 4.2.8, confirming internal consistency.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_shap_waterfall_tp_tuned.png}
+  \caption{SHAP waterfall plot - True Positive case (XGBoost).
+  The model correctly predicts fraud; positive SHAP values push the
+  prediction above the decision threshold.}
+  \label{fig:wf_tp}
+\end{figure}
+
+Figure~\ref{fig:wf_fp} examines the false-positive case, where the
+model incorrectly flags a legitimate provider. Understanding which
+features mislead the model in these cases is important for refining
+the feature-engineering pipeline and for communicating audit priorities
+to investigators.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_shap_waterfall_fp_tuned.png}
+  \caption{SHAP waterfall plot - False Positive case (XGBoost).
+  The model incorrectly predicts fraud for a legitimate provider,
+  revealing which features are responsible for the erroneous signal.}
+  \label{fig:wf_fp}
+\end{figure}
+
+Figure~\ref{fig:wf_fn} shows the false-negative case, where the model
+fails to flag an actual fraudulent provider. Analysing the suppressive
+SHAP contributions in this case highlights potential weaknesses in the
+current feature set or thresholding strategy.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_shap_waterfall_fn_tuned.png}
+  \caption{SHAP waterfall plot - False Negative case (XGBoost).
+  The model misses an actual fraudulent provider; negative SHAP
+  contributions suppress the prediction below the decision threshold.}
+  \label{fig:wf_fn}
+\end{figure}
+
+% --------------------------------------------------------------------
+\subsection{LIME Explanations}
+% --------------------------------------------------------------------
+
+LIME (Local Interpretable Model-agnostic Explanations) was applied as
+an independent local-explanation technique to cross-validate the SHAP
+waterfall findings. LIME fits a weighted linear model in the neighbourhood
+of each instance, providing a complementary, model-agnostic perspective
+on individual predictions.
+
+Figure~\ref{fig:lime_tp} shows the LIME explanation for the same
+true-positive provider examined in the SHAP waterfall analysis.
+Features coloured in orange support the fraud prediction; features in
+blue oppose it.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_lime_tp_tuned.png}
+  \caption{LIME local explanation - True Positive case (XGBoost).
+  Orange bars indicate features supporting the fraud prediction;
+  blue bars indicate features opposing it.}
+  \label{fig:lime_tp}
+\end{figure}
+
+Figure~\ref{fig:lime_fp} presents the LIME explanation for the
+false-positive provider. Comparing these weights against the
+corresponding SHAP waterfall (Figure~\ref{fig:wf_fp}) reveals whether
+both explanation methods agree on the misleading features.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_lime_fp_tuned.png}
+  \caption{LIME local explanation - False Positive case (XGBoost).
+  The linear approximation reveals which feature values drove the
+  erroneous fraud classification.}
+  \label{fig:lime_fp}
+\end{figure}
+
+Figure~\ref{fig:lime_fn} shows the LIME explanation for the
+false-negative provider. Where LIME and SHAP agree on the suppressive
+features, this provides stronger evidence that the model has learned a
+systematic blind spot for this provider sub-type.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_lime_fn_tuned.png}
+  \caption{LIME local explanation - False Negative case (XGBoost).
+  Features with negative LIME weights suppress the fraud score,
+  explaining why the model misses this fraudulent provider.}
+  \label{fig:lime_fn}
+\end{figure}
+
+% --------------------------------------------------------------------
+\subsection{Feature Selection Ablation}
+% --------------------------------------------------------------------
+
+To determine the minimum feature subset that preserves predictive
+performance, a stepwise feature-selection ablation was conducted.
+Starting from the top-10 SHAP-ranked features and incrementally adding
+features up to the full 190-feature set, XGBoost was re-evaluated via
+10-fold CV at each step. Results are summarised in Table~\ref{tab:featsel}.
+
+\begin{table}[H]
+\caption{Feature-selection ablation: XGBoost F1 as a function of
+top-$K$ SHAP-ranked features (10-fold CV, tuned).}
+\label{tab:featsel}
+\centering
+\begin{tabular}{cc}
+\toprule
+\textbf{Feature Subset Size ($K$)} & \textbf{F1} \\
+\midrule
+10  & 0.6534 \\
+20  & 0.6763 \\
+30  & 0.6716 \\
+40  & 0.6711 \\
+190 & \textbf{0.7350} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A substantial performance gap separates the reduced subsets from the
+full feature set. Using only the top 10 features yields F1 = 0.6534,
+a gap of 8.2 percentage points below the full-feature F1 of 0.7350.
+Increasing the subset to 20 features recovers some performance
+(F1 = 0.6763), but further expansion to 30 and 40 features does not
+continue this improvement monotonically - suggesting diminishing returns
+and possible feature redundancy in the 21-40 rank range. The full
+feature set consistently outperforms all reduced variants, indicating
+that the less-prominent features (ranks 11-190) collectively encode
+complementary signals that the model exploits. This result argues
+against aggressive feature pruning in the current pipeline; future
+work could explore structured feature compression (e.g., PCA or
+autoencoders) rather than SHAP-rank truncation. Figure~\ref{fig:feat_sel} visualises this trend.
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.75\textwidth]{fig_feature_selection.png}
+\caption{Feature selection ablation: F1-score as a function of the number of top-K features selected by permutation importance. The full 190-feature set achieves the best performance.}
+\label{fig:feat_sel}
+\end{figure}
+
+% --------------------------------------------------------------------
+\subsection{Learning Curves}
+% --------------------------------------------------------------------
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_learning_curves.png}
+  \caption{Learning curves for XGBoost: training F1 and
+  cross-validation F1 as a function of training-set size. The
+  plateau in validation F1 and the gap between training and
+  validation curves indicate the degree of overfitting.}
+  \label{fig:learning}
+\end{figure}
+
+The learning curves in Figure~\ref{fig:learning} reveal a classic
+overfitting signature: training F1 reaches 1.0 across all training-set
+sizes, while validation F1 plateaus near 0.73. The large and persistent
+gap between the two curves confirms that XGBoost has sufficient capacity
+to perfectly memorise the training data but that the learned decision
+boundary does not generalise fully to held-out providers. This behaviour
+is expected for gradient-boosted trees with deep individual estimators
+on a moderately sized tabular dataset. The validation curve
+does not exhibit a downward trend as training size increases, indicating
+that the model is not in a high-variance regime where more data would
+hurt. Additional training data (e.g., incorporating Medicare Part A or
+DMEPOS claims) could plausibly narrow this gap. Regularisation
+parameters such as \texttt{min\_child\_weight}, \texttt{max\_depth},
+and \texttt{subsample} were already tuned by Optuna, so the remaining
+gap reflects an irreducible component related to feature informativeness
+rather than model over-complexity.
+
+% --------------------------------------------------------------------
+\subsection{Calibration Analysis}
+% --------------------------------------------------------------------
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.80\textwidth]{fig_calibration.png}
+  \caption{Probability calibration curve for XGBoost (reliability
+  diagram): mean predicted probability versus fraction of positives in
+  each probability bin. A perfectly calibrated model lies on the
+  diagonal. The histogram shows the distribution of predicted
+  probabilities.}
+  \label{fig:calibration}
+\end{figure}
+
+Figure~\ref{fig:calibration} plots the reliability diagram for XGBoost.
+The model is well-calibrated in the low-probability range (0-0.3)
+but tends to over-predict fraud probability in the mid-range (0.3-0.7),
+a pattern common to gradient-boosted trees that produce overconfident
+probability estimates near the decision boundary. In the high-confidence
+region ($p > 0.7$), calibration recovers. For operational deployment,
+Platt scaling or isotonic regression post-processing could be applied
+to reduce mid-range over-confidence and improve the reliability of the
+fraud probability scores displayed on the dashboard, particularly when
+risk-level boundaries (\textit{Low}/\textit{Medium}/\textit{High}) are
+defined by fixed probability cutoffs.
+
+
+% --------------------------------------------------------------------
+\subsection{Blockchain Verification}
+\label{sec:blockchain_verification}
+% --------------------------------------------------------------------
+
+Upon completion of the full pipeline run, all blockchain integrity
+checks were executed programmatically. The results are as follows:
+
+\begin{itemize}[nosep,leftmargin=1.5em]
+  \item \textbf{Chain length:} 110 blocks, 5{,}410 provider records
+        registered.
+  \item \textbf{Chain validation:} PASSED - all sequential
+        \texttt{previous\_hash} links are intact and every block hash
+        satisfies the SHA-256 Proof-of-Work constraint (difficulty 2,
+        leading zeros verified).
+  \item \textbf{Merkle proof:} PASSED - membership proof traversed
+        6 Merkle-tree levels successfully; root digest matches the
+        stored \texttt{merkle\_root} field in the block header.
+  \item \textbf{ECIES decryption:} PASSED - all \texttt{provider\_id}
+        fields were successfully decrypted using the private key,
+        confirming round-trip encryption integrity.
+  \item \textbf{Block build time:} 7.0 seconds for 5{,}410 records,
+        averaging approximately 1.3 ms per record - well within
+        real-time throughput requirements for claims-audit workflows.
+  \item \textbf{Tamper detection:} A synthetic tamper test (modifying
+        a single field in block 50) was detected immediately at the
+        next hash-chain validation step, confirming auditability.
+\end{itemize}
+
+These results confirm that the blockchain layer provides end-to-end
+data integrity, privacy-preserving storage, and cryptographic
+auditability without introducing unacceptable latency. The combination
+of SHA-256 chaining, Merkle proofs, and ECIES encryption satisfies
+the transparency and non-repudiation requirements stipulated for
+healthcare fraud audit trails under relevant regulatory frameworks.

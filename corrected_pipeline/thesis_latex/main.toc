@@ -1,0 +1,101 @@
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Overview}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Healthcare Insurance}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Healthcare Fraud}{2}{section.1.3}%
+\contentsline {subsection}{\numberline {1.3.1}Healthcare Service Provider's Fraud}{3}{subsection.1.3.1}%
+\contentsline {subsection}{\numberline {1.3.2}HI Subscribers Fraud}{4}{subsection.1.3.2}%
+\contentsline {subsection}{\numberline {1.3.3}HI Providers Fraud}{4}{subsection.1.3.3}%
+\contentsline {section}{\numberline {1.4}Fraud Prevention in Health Insurance}{4}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Machine Learning and Blockchain for Healthcare Fraud Prevention}{5}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Innovative Healthcare Insurance Fraud Detection}{6}{section.1.6}%
+\contentsline {section}{\numberline {1.7}Fraud Detection Issues and Challenges}{7}{section.1.7}%
+\contentsline {subsection}{\numberline {1.7.1}Sophisticated Fraud Schemes}{8}{subsection.1.7.1}%
+\contentsline {subsection}{\numberline {1.7.2}Data Volume and Variety}{8}{subsection.1.7.2}%
+\contentsline {subsection}{\numberline {1.7.3}Data Quality}{8}{subsection.1.7.3}%
+\contentsline {subsection}{\numberline {1.7.4}Connecting to Outdated Computer Systems}{9}{subsection.1.7.4}%
+\contentsline {subsection}{\numberline {1.7.5}Privacy Concerns}{9}{subsection.1.7.5}%
+\contentsline {subsection}{\numberline {1.7.6}Lack of Standardization}{9}{subsection.1.7.6}%
+\contentsline {subsection}{\numberline {1.7.7}Security of HI System}{10}{subsection.1.7.7}%
+\contentsline {subsection}{\numberline {1.7.8}Resource Constraints}{10}{subsection.1.7.8}%
+\contentsline {subsection}{\numberline {1.7.9}Cross-Channel Fraud}{10}{subsection.1.7.9}%
+\contentsline {subsection}{\numberline {1.7.10}Regulatory Challenges}{11}{subsection.1.7.10}%
+\contentsline {subsection}{\numberline {1.7.11}Machine Learning and AI Limitations}{11}{subsection.1.7.11}%
+\contentsline {subsection}{\numberline {1.7.12}Human Expertise}{12}{subsection.1.7.12}%
+\contentsline {section}{\numberline {1.8}Taxonomy of Health Insurance Fraud Detection}{12}{section.1.8}%
+\contentsline {subsection}{\numberline {1.8.1}Supervised Learning}{12}{subsection.1.8.1}%
+\contentsline {subsection}{\numberline {1.8.2}Unsupervised Learning}{13}{subsection.1.8.2}%
+\contentsline {subsection}{\numberline {1.8.3}Hybrid Approach}{13}{subsection.1.8.3}%
+\contentsline {subsection}{\numberline {1.8.4}HIC Fraud Detection from Group of People}{13}{subsection.1.8.4}%
+\contentsline {subsection}{\numberline {1.8.5}Blockchain-Based HIC Fraud Prevention}{14}{subsection.1.8.5}%
+\contentsline {subsection}{\numberline {1.8.6}AI and Blockchain-Based HIC Fraud Detection}{14}{subsection.1.8.6}%
+\contentsline {section}{\numberline {1.9}Security and Privacy Requirements of Healthcare Applications}{14}{section.1.9}%
+\contentsline {subsection}{\numberline {1.9.1}Data Confidentiality}{15}{subsection.1.9.1}%
+\contentsline {subsection}{\numberline {1.9.2}Data Authentication}{15}{subsection.1.9.2}%
+\contentsline {subsection}{\numberline {1.9.3}Strong User Authentication}{15}{subsection.1.9.3}%
+\contentsline {subsection}{\numberline {1.9.4}Data Integrity}{16}{subsection.1.9.4}%
+\contentsline {subsection}{\numberline {1.9.5}Key Distribution}{16}{subsection.1.9.5}%
+\contentsline {subsection}{\numberline {1.9.6}Access Control}{16}{subsection.1.9.6}%
+\contentsline {subsection}{\numberline {1.9.7}Data Availability}{17}{subsection.1.9.7}%
+\contentsline {subsection}{\numberline {1.9.8}Data Freshness}{17}{subsection.1.9.8}%
+\contentsline {subsection}{\numberline {1.9.9}Secure Localization}{17}{subsection.1.9.9}%
+\contentsline {subsection}{\numberline {1.9.10}Patient Permission}{18}{subsection.1.9.10}%
+\contentsline {chapter}{\numberline {2}Literature Review}{19}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Overview}{19}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Review of Individual Studies}{20}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Comparison of Literature Review}{25}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Identified Gaps in the Literature}{28}{section.2.4}%
+\contentsline {chapter}{\numberline {3}Methodology}{30}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Overview}{30}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Background Study}{30}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Research Gap}{31}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Limited Utilisation of Advanced Technologies}{31}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Lack of Comprehensive Data Integration}{31}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}Dynamic Nature of Fraud Schemes}{32}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}Blockchain Integration}{32}{subsection.3.3.4}%
+\contentsline {subsection}{\numberline {3.3.5}Ethical and Privacy Concerns}{32}{subsection.3.3.5}%
+\contentsline {subsection}{\numberline {3.3.6}Cost-Effectiveness}{32}{subsection.3.3.6}%
+\contentsline {subsection}{\numberline {3.3.7}Regulatory Compliance}{33}{subsection.3.3.7}%
+\contentsline {subsection}{\numberline {3.3.8}User Adoption and Training}{33}{subsection.3.3.8}%
+\contentsline {subsection}{\numberline {3.3.9}Real-World Implementation Challenges}{33}{subsection.3.3.9}%
+\contentsline {subsection}{\numberline {3.3.10}Benchmarking and Evaluation Metrics}{34}{subsection.3.3.10}%
+\contentsline {section}{\numberline {3.4}Dataset Description}{34}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Research Methodology}{36}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}Technique Used}{36}{subsection.3.5.1}%
+\contentsline {paragraph}{Cross-Validation Feature Computation.}{38}{Item.17}%
+\contentsline {paragraph}{Design Rationale: Custom Blockchain.}{39}{Item.18}%
+\contentsline {paragraph}{Proof-of-Work Difficulty.}{39}{Item.18}%
+\contentsline {paragraph}{Threat Model.}{39}{Item.18}%
+\contentsline {subsubsection}{Design Decisions and Rationale}{40}{Item.21}%
+\contentsline {subsubsection}{Pipeline Flowchart}{42}{table.3.2}%
+\contentsline {chapter}{\numberline {4}Results and Discussion}{47}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Overview}{47}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Results Analysis}{47}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Data Input and Blockchain Results}{47}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Optuna Hyperparameter Optimisation}{48}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Model Analysis and Performance Evaluation}{49}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Statistical Significance}{49}{subsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.2.5}Threshold Optimisation}{51}{subsection.4.2.5}%
+\contentsline {subsection}{\numberline {4.2.6}Bootstrap Confidence Intervals}{52}{subsection.4.2.6}%
+\contentsline {subsection}{\numberline {4.2.7}SMOTE-ENN Ablation Study}{53}{subsection.4.2.7}%
+\contentsline {subsection}{\numberline {4.2.8}Feature Importance Ranking}{54}{subsection.4.2.8}%
+\contentsline {subsection}{\numberline {4.2.9}SHAP Waterfall Case Studies}{59}{subsection.4.2.9}%
+\contentsline {subsection}{\numberline {4.2.10}LIME Explanations}{63}{subsection.4.2.10}%
+\contentsline {subsection}{\numberline {4.2.11}Feature Selection Ablation}{63}{subsection.4.2.11}%
+\contentsline {subsection}{\numberline {4.2.12}Learning Curves}{66}{subsection.4.2.12}%
+\contentsline {subsection}{\numberline {4.2.13}Calibration Analysis}{66}{subsection.4.2.13}%
+\contentsline {subsection}{\numberline {4.2.14}Blockchain Verification}{68}{subsection.4.2.14}%
+\contentsline {chapter}{\numberline {5}Conclusion and Future Work}{69}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Overview}{69}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Conclusion}{70}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Data Preprocessing and Feature Engineering}{70}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Hyperparameter Tuning and the SMOTE-ENN Finding}{71}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Model Performance and Threshold Optimisation}{72}{subsection.5.2.3}%
+\contentsline {subsection}{\numberline {5.2.4}Explainability via SHAP and LIME}{72}{subsection.5.2.4}%
+\contentsline {subsection}{\numberline {5.2.5}Blockchain Architecture and Security Properties}{73}{subsection.5.2.5}%
+\contentsline {subsection}{\numberline {5.2.6}Comparison with Prior Literature}{73}{subsection.5.2.6}%
+\contentsline {section}{\numberline {5.3}Limitations}{74}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Future Work}{76}{section.5.4}%
+\contentsline {chapter}{\numberline {A}Appendix}{87}{appendix.A}%
+\contentsline {section}{\numberline {A.1}Tuned Hyperparameters}{87}{section.A.1}%
+\contentsline {section}{\numberline {A.2}Model Performance Summary}{88}{section.A.2}%
+\contentsline {section}{\numberline {A.3}190 Engineered Features (52 Core + 138 Derived)}{89}{section.A.3}%

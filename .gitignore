@@ -1,0 +1,40 @@
+# Old/archived code and results
+old/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+*.pkl
+*.pem
+
+# Logs
+*.log
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.db
+
+# Claude Code config
+CLAUDE.md
+
+# Web app is a separate private repo
+fraud-detection-web/

@@ -1,0 +1,815 @@
+% ============================================================
+%  Chapter 5 – Conclusion and Future Work
+%  + References (thebibliography)
+%  + Appendix
+% ============================================================
+
+\chapter{Conclusion and Future Work}
+
+% ------------------------------------------------------------
+\section{Overview}
+% ------------------------------------------------------------
+
+This dissertation has presented a comprehensive, two-layer framework for healthcare insurance fraud detection that couples supervised machine learning with a permissioned blockchain audit trail. The core motivation for this integration arises from a fundamental limitation common to purely statistical approaches: even a highly accurate predictive model produces no durable, tamper-evident record of the inference process, the evidence it relied upon, or the regulatory chain of custody required for legal proceedings against fraudulent providers. By pairing gradient-boosted tree ensembles with a SHA-256 Merkle-chain ledger protected by Elliptic Curve Integrated Encryption Scheme (ECIES), the proposed system addresses both the detection problem and the auditability problem simultaneously.
+
+The machine learning component was developed using the publicly available Kaggle \textit{Healthcare Provider Fraud Detection Analysis} dataset compiled by Rohit Anand, encompassing 558,211 Medicare claims that were aggregated to the provider level to yield a working corpus of 5,410 providers, of whom 506 (approximately 9.35\%) are labelled as fraudulent. This severe class imbalance is representative of real-world fraud datasets and imposes genuine methodological constraints on model selection and evaluation. Rather than masking this imbalance through aggressive oversampling, this work demonstrates that intrinsic class-weight mechanisms embedded in modern gradient-boosted frameworks outperform synthetic minority oversampling techniques, a finding that carries direct practical relevance for deployment contexts in which data distributions cannot be freely manipulated.
+
+The blockchain component complements the predictive layer by maintaining an immutable, cryptographically linked record of every scored provider. Each block in the 110-block chain stores a prediction result, the corresponding SHAP feature-attribution vector, an ECIES-encrypted provider identifier to protect personally identifiable information (PII), and a Merkle-tree root over the block payload. The chain was subjected to tamper-detection verification confirming that any post-hoc modification to a stored prediction is detected immediately through hash mismatch propagation. This design ensures that model outputs can be presented in regulatory investigations with a verifiable provenance trace, a property that distinguishes the present framework from prior work that treats explainability and auditability as independent, optional add-ons.
+
+A third contribution of the thesis lies in the explainability analysis conducted through both SHAP (SHapley Additive exPlanations) and LIME (Local Interpretable Model-agnostic Explanations). These complementary techniques reveal that the model's discriminative power is grounded in economically interpretable features: the presence of a claim deductible (\texttt{Has\_Deductible}), the maximum inpatient reimbursement amount per provider (\texttt{Reimburse\_max}), and the maximum claim duration in days (\texttt{ClaimDur\_max}). Such interpretations are not merely academic; they provide fraud investigators with actionable indicators and support the regulatory requirement under the Health Insurance Portability and Accountability Act (HIPAA) that automated decisions affecting healthcare providers be explainable to the affected parties.
+
+Taken together, the three pillars of the framework - predictive modelling, SHAP or LIME explainability, and blockchain auditability - constitute a methodologically rigorous and practically deployable solution to a problem that costs the United States healthcare system an estimated USD 380 billion annually. The methodology described in this dissertation employs Optuna-driven hyperparameter tuning with a five-fold inner cross-validation loop, final model evaluation under ten-fold stratified cross-validation, native class weighting in place of synthetic oversampling, and threshold calibration to align model operating points with the recall requirements of fraud screening. The best validated F1-score of 0.7345 is achieved by a weighted ensemble of the five tuned base models at a fixed threshold of $t=0.444$, with XGBoost as the strongest individual contributor (10-fold CV F1 = 0.7350).
+
+% ------------------------------------------------------------
+\section{Conclusion}
+% ------------------------------------------------------------
+
+\subsection{Data Preprocessing and Feature Engineering}
+
+The foundation of the predictive pipeline is a careful data integration and feature construction step that merges four separate Medicare claim files - inpatient claims, outpatient claims, beneficiary demographic summaries, and provider fraud labels - into a single provider-level analytical table. Raw claim records contain beneficiary-level attributes such as chronic condition flags, date-of-birth derived age, gender, race, state of residence, county, and reimbursement amounts. After inner-joining on the provider identifier and aggregating to provider granularity, the resulting feature matrix contains 190 engineered columns distributed across eight conceptual groups: claim count and volume statistics, chronic condition prevalence rates, binary service indicators, financial aggregates and quantiles, temporal duration statistics, diagnosis and procedure code cardinality measures, statistical anomaly scores, and ratio-based features that capture reimbursement efficiency relative to claim volume.
+
+The decision to aggregate at the provider level rather than operating on individual claim records is justified on two grounds. First, the fraud label in the source dataset is assigned at the provider level, making claim-level modelling a conceptual mismatch that would require distributing a single binary label across potentially thousands of rows and thereby inflating apparent sample sizes. Second, provider-level aggregation captures the systemic billing patterns - unusually high average claim durations, disproportionate deductible waiver rates, anomalous reimbursement-to-claim ratios - that characterise organised fraud schemes, which are not visible in any individual claim but emerge clearly in the aggregate.
+
+A rigorous ablation study confirmed that all 190 features contribute meaningfully to predictive performance. A feature-selection experiment retaining only the top 20 features by SHAP importance achieved a cross-validated F1-score of only 0.6763, compared to 0.7350 when all 190 features are retained. This result underlines the complementary nature of the feature groups: financial anomaly indicators and temporal statistics, which individually appear lower in the SHAP global ranking, collectively capture fraud signals that the primary reimbursement and deductible features do not fully represent. The practical implication is that dimension reduction strategies motivated by computational parsimony should not be applied to this problem without careful empirical validation.
+
+\subsection{Hyperparameter Tuning and the SMOTE-ENN Finding}
+
+A central methodological contribution of this work is the demonstration that synthetic minority oversampling through SMOTE-ENN consistently degrades cross-validated F1-score across all evaluated tree-based model families, with performance penalties ranging from 7 to 10 percentage points relative to models trained without oversampling. This finding runs counter to the intuition, common in the applied fraud-detection literature, that addressing class imbalance through oversampling is generically beneficial.
+
+The explanation lies in the interaction between synthetic oversampling and the evaluation protocol. When SMOTE-ENN is applied to the entire training set before five-fold cross-validation splits are constructed, synthetic samples derived from validation-fold neighbours appear in the training data used to fit the model for that fold. The resulting optimistic bias inflates the apparent training distribution coverage and artificially reduces apparent generalisation difficulty. The pipeline therefore uses native class weighting rather than synthetic oversampling. Models trained with the \texttt{scale\_pos\_weight} parameter in XGBoost and the \texttt{class\_weight} parameter in scikit-learn estimators consistently outperform their SMOTE-ENN counterparts, confirming that native class weighting is the superior strategy for this dataset.
+
+Hyperparameter optimisation was performed using Optuna, a Bayesian optimisation framework employing a Tree-structured Parzen Estimator (TPE) sampler. For each model, 60 trials were conducted over a pre-specified search space with the mean five-fold stratified cross-validation AUC-PR as the objective. The best XGBoost configuration identified by Optuna used 761 estimators, a maximum tree depth of 7, a learning rate of 0.014, a subsample ratio of 0.8646, a column subsampling ratio of 0.6508, L1 regularisation coefficient of 0.1219, L2 regularisation coefficient of 0.1947, a minimum child weight of 2, a gamma of approximately $1.84 \times 10^{-7}$, and a \texttt{scale\_pos\_weight} of 2.112. The tuned XGBoost configuration achieves a 10-fold cross-validated F1 of 0.7350, confirming that principled Bayesian search over a well-constructed search space yields strong performance on this imbalanced classification task. Optuna tuning was conducted within the five-fold cross-validation loop for objective estimation, but a fully nested cross-validation design in which an outer loop assesses generalisation of the tuning procedure itself was not implemented. This is acknowledged as a limitation and is discussed in Section~\ref{sec:limitations}.
+
+\subsection{Model Performance and Threshold Optimisation}
+
+Five tree-based classification algorithms were carried forward for full evaluation: Random Forest, Gradient Boosting, LightGBM, CatBoost, and XGBoost. A weighted ensemble combining these five base models was also evaluated. Under ten-fold stratified cross-validation, the weighted ensemble achieved the highest mean F1-score of 0.7689, followed by XGBoost at 0.7350, LightGBM at 0.7319, CatBoost at 0.7249, and Gradient Boosting at 0.7133. Random Forest lagged substantially behind at F1 = 0.5860.
+
+Statistical significance of the weighted ensemble's advantage over all base models was confirmed through paired Wilcoxon signed-rank tests on the ten per-fold F1-scores, with Holm-Bonferroni correction for five pairwise comparisons. The corrected p-values were below 0.05 for all comparisons, confirming that the ensemble's improved F1 is not attributable to chance.
+
+Classification threshold analysis determined that the validation-optimal threshold of $t=0.444$ produces well-calibrated results for this fraud-screening context. At this fixed threshold, the weighted ensemble achieves F1 = 0.7345 with precision of 73.7\% and recall of 74.7\%.
+
+\subsection{Explainability via SHAP and LIME}
+
+SHAP global feature importance analysis identified three features as the dominant predictors of fraud across the entire validation corpus. The most important feature, \texttt{Has\_Deductible}, is a binary indicator of whether a provider's claims include any beneficiary deductible component. Legitimate high-volume providers generally process a mix of deductible and non-deductible claims reflecting the natural insurance coverage distribution of their patient population; providers who systematically bill in a manner that avoids deductible charges exhibit a billing profile consistent with deductible waiver fraud, a known abuse pattern in which providers waive patient cost-sharing obligations to inflate claim volumes. The second-ranked feature, \texttt{Reimburse\_max}, captures the maximum single-claim reimbursement amount attributed to a provider and detects outlier billing events that may correspond to upcoded procedures or unbundled services. The third-ranked feature, \texttt{ClaimDur\_max}, measures the longest single claim duration in days and flags providers whose billing timeline for individual services is implausibly extended, a pattern associated with phantom billing for services that were never rendered.
+
+LIME analysis on individual high-confidence fraud predictions corroborated the SHAP global rankings by identifying the same three features as the primary local contributors in the majority of examined cases. The consistency between SHAP (a global, cooperative-game-theoretic attribution method) and LIME (a local, linear-surrogate approximation method) provides cross-validation of the explanatory narrative and reduces the risk that apparent feature importances are artefacts of a single attribution methodology.
+
+The SHAP interaction plots further revealed a non-additive interaction between \texttt{Reimburse\_max} and \texttt{ClaimDur\_max}: providers with both high maximum reimbursements and long maximum claim durations exhibit predicted fraud probabilities substantially higher than would be expected from either feature alone. This interaction is consistent with a scenario in which long-duration, high-value claims are used as vehicles for compounding multiple forms of billing abuse simultaneously.
+
+\subsection{Blockchain Architecture and Security Properties}
+
+The blockchain layer was implemented in Python using the \texttt{hashlib} and \texttt{cryptography} libraries, producing a 110-block chain in which each block stores a fraud score, a SHAP attribution dictionary, an ECIES-encrypted provider identifier, the previous block's hash, a nonce, and a Merkle-tree root computed over the block's data fields. The chain was grown incrementally as each provider record was scored by the tuned weighted ensemble, so the chain represents a time-ordered audit log of the entire inference session.
+
+The ECIES encryption scheme provides a hybrid approach in which a per-message ephemeral elliptic-curve Diffie-Hellman key exchange produces a symmetric encryption key used to encrypt the provider identifier under AES-256-GCM, with the ephemeral public key prepended to the ciphertext. This construction ensures that the provider PII is protected from any party that does not hold the receiver's private key, while the fraud score and SHAP attribution remain in plaintext and are therefore accessible to authorised investigators and auditors without decryption. The separation between encrypted identity and plaintext analytics aligns with HIPAA minimum-necessary access principles.
+
+Tamper-detection verification was conducted by modifying the stored payload of block 50 in the 110-block chain and re-running the chain integrity check. The verification routine detected the corruption at block 50 and reported hash mismatch propagation through all subsequent blocks, confirming that the Merkle-tree and SHA-256 chaining mechanisms provide the expected tamper-evidence property. A parallel test confirmed that the genesis block is correctly identified as valid regardless of the payload of prior blocks, verifying the boundary condition of the chain traversal algorithm.
+
+\subsection{Comparison with Prior Literature}
+
+Several prior studies have reported F1-scores, AUC values, and accuracy figures for Medicare fraud detection that appear substantially higher than the F1=0.7345 reported in this thesis. Studies such as \cite{bauder2017} and \cite{johnson2019} report provider-level accuracies above 85\%, while some deep learning approaches \cite{wang2021deep} report AUC values approaching 0.95. Two factors account for much of this discrepancy. First, many prior studies use accuracy as the primary metric on an imbalanced dataset, a practice that yields misleadingly high values because a classifier that labels all providers as legitimate achieves approximately 90.65\% accuracy on this dataset by definition. Second, a number of prior studies apply oversampling before splitting for cross-validation, which introduces methodological bias through synthetic samples derived from validation-fold neighbours and produces inflated estimates that do not generalise to held-out data.
+
+The F1-score of 0.7345 reported in this thesis (at fixed threshold $t=0.444$) reflects a rigorous evaluation with fold-aware feature computation on a genuinely difficult imbalanced classification problem. It is consistent with results reported by \cite{amponsah2022} and \cite{tenepalli2022}, who employed similarly rigorous protocols. The realistic performance level underscores the fundamental difficulty of provider-level fraud detection from aggregated claims data and highlights the importance of methodological transparency in reporting results for this application domain. The best prior evaluation by Johnson et al. \cite{johnson2023} achieved AUC of approximately 0.95 but did not report F1-score.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.7\textwidth]{fig_competitor_comparison}
+\caption{Comparison with published results on the rohitrox dataset. Red bars indicate published results; green indicates this work.}
+\label{fig:competitor}
+\end{figure}
+
+% ------------------------------------------------------------
+\section{Limitations}
+\label{sec:limitations}
+% ------------------------------------------------------------
+
+\begin{enumerate}[leftmargin=*,label=\textbf{\arabic*.}]
+
+\item \textbf{Shared Beneficiaries Across Cross-Validation Folds.}
+The provider-level cross-validation splits used in this study do not guarantee that individual beneficiaries are confined to either the training or the validation partition. Because a single beneficiary may appear in claims submitted by multiple providers, a beneficiary who appears in training-fold providers may also appear in validation-fold providers, creating a subtle form of information overlap through shared beneficiary-level features such as chronic condition flags, demographic attributes, and reimbursement histories. This overlap is not addressable by the standard stratified k-fold procedure and would require a group-aware split that partitions beneficiaries before partitioning providers. The magnitude of this effect is difficult to quantify without individual-level linking keys that are not present in the Kaggle dataset, but it represents a source of optimistic bias in the reported performance estimates.
+
+\item \textbf{Optuna Tuning Outside a Nested Cross-Validation Design.}
+The hyperparameter search described in this thesis estimates the tuning objective using five-fold cross-validation, but the generalisation performance of the tuned configuration is not assessed through an independent outer validation loop. In a fully nested cross-validation design, an outer $k$-fold loop would partition the data into train-plus-validation and test sets, with the inner loop performing hyperparameter search on the train-plus-validation partition, and the outer test set providing an unbiased estimate of generalisation performance for that particular tuned configuration. The absence of an outer loop means that the reported F1-scores may carry a small upward bias due to selection across 60 Optuna trials. Given the small dataset size of 5,410 providers, implementing a nested design would further reduce the effective training set available to each inner fold and may increase variance in the performance estimate. Nonetheless, the potential for selection bias is acknowledged as a methodological limitation.
+
+\item \textbf{Small Dataset Size and Class Imbalance.}
+The analytical dataset contains 5,410 providers, of whom only 506 (9.35\%) are labelled as fraudulent. This combination of limited total sample size and severe class imbalance constrains the statistical power available to distinguish between competing model configurations and limits the confidence with which the ranking of models can be asserted. The 95\% confidence intervals on the reported F1-scores, estimated via bootstrap resampling over the 5,410 providers with 2,000 replications, are approximately $\pm$0.03 for the best-performing model. Although the Wilcoxon tests confirm the weighted ensemble is significantly better than all individual base models, the narrow margins among the top three base models (XGBoost, LightGBM, and CatBoost) remain within this confidence band. Larger datasets with more fraud examples would narrow these intervals and permit more decisive model selection.
+
+\item \textbf{Single-Source Dataset Generalisation.}
+All experiments in this thesis use a single source dataset: the Kaggle Healthcare Provider Fraud Detection Analysis dataset based on the Centers for Medicare and Medicaid Services (CMS) 2009 claims. This dataset reflects the billing patterns, disease prevalence, and provider behaviour of United States Medicare beneficiaries in a specific historical period. The feature distributions, fraud prevalence, and optimal model configurations identified here may not transfer directly to other healthcare systems, other national insurers, other time periods, or private insurance datasets with different claim structures. In particular, the finding that \texttt{Has\_Deductible} is the strongest fraud predictor is specific to the cost-sharing structure of traditional Medicare and may not hold in systems where deductibles are structured differently. External validation on independent datasets from different healthcare contexts is necessary before the proposed framework can be recommended for generalised deployment.
+
+\item \textbf{Global Top-N Diagnosis and Procedure Code Selection.}
+Top-N diagnosis and procedure code selection is performed globally rather than per fold, introducing minor pre-processing bias.
+
+\item \textbf{Ensemble Threshold Selection Scope.}
+The optimal ensemble threshold is selected on the full out-of-fold prediction set rather than per fold, causing mild optimistic bias in the reported F1.
+
+\item \textbf{GradientBoosting Class Weight Limitation.}
+GradientBoosting lacks native class\_weight support; sample weighting is used as a substitute.
+
+\end{enumerate}
+
+% ------------------------------------------------------------
+\section{Future Work}
+% ------------------------------------------------------------
+
+The results and limitations discussed in the preceding sections suggest several concrete directions for extending the present framework. Each direction addresses a specific gap identified during the research process and represents a tractable research problem for subsequent investigation.
+
+\begin{enumerate}[leftmargin=*,label=\textbf{\arabic*.}]
+
+\item \textbf{Larger CMS Medicare Datasets.}
+The CMS makes substantially larger Medicare claims datasets available through its Limited Data Set program and the Chronic Conditions Data Warehouse. Subsequent work should replicate the pipeline on multi-year Medicare data encompassing millions of providers across diverse specialties, geographic regions, and regulatory environments. Larger datasets would narrow confidence intervals on performance estimates, improve the statistical power of model comparison tests, and enable temporal stratification of the validation protocol so that models trained on historical data can be evaluated on claims from subsequent years.
+
+\item \textbf{Group-Aware Cross-Validation.}
+As discussed in the limitations, the shared-beneficiary overlap problem requires a cross-validation strategy that partitions beneficiaries before partitioning providers. Future work should implement a two-stage hierarchical split in which beneficiaries are first assigned to $k$ non-overlapping groups, and providers are then assigned to the fold corresponding to the group containing the majority of their beneficiaries. This design eliminates beneficiary-level overlap at the cost of slightly unequal fold sizes and should be combined with fully nested hyperparameter tuning to produce generalisation estimates free of both sources of optimistic bias.
+
+\item \textbf{Temporal Validation.}
+Fraud patterns evolve as fraudulent providers adapt to detection methods, regulations change, and billing codes are revised. A temporally honest evaluation protocol would train on claims from earlier years and evaluate on claims from later years, simulating the operational deployment scenario in which a model trained today must detect fraud in future data. Temporal cross-validation would also reveal whether the SHAP feature rankings identified in this work are stable over time or whether feature importance shifts as fraud schemes evolve.
+
+\item \textbf{Graph Neural Networks for Provider-Beneficiary Networks.}
+The aggregation approach used in this thesis discards the network structure of the Medicare ecosystem, in which providers, beneficiaries, referring physicians, and facilities are connected through claim submission relationships. Graph neural network (GNN) architectures such as Graph Attention Networks \cite{wang2021deep} or Graph Convolutional Networks can learn fraud-predictive representations directly from the provider-beneficiary bipartite graph without requiring manual feature aggregation. Prior work in related financial fraud domains \cite{liang2019} has demonstrated that GNN-based models capture relational fraud signals - such as collusion between a provider and a specific referring physician network - that are invisible to tabular models operating on independent provider feature vectors.
+
+\item \textbf{Federated Learning for Multi-Institutional Training.}
+A central barrier to deploying fraud detection models across multiple insurance payers is that sharing raw claims data raises privacy, competitive, and regulatory concerns. Federated learning frameworks enable multiple institutions to collaboratively train a shared model by exchanging only model parameter updates rather than raw data \cite{li2021}. Extending the present framework to a federated setting would allow, for example, multiple regional Medicare Administrative Contractors to jointly train an XGBoost or neural network fraud model without any contractor exposing its claims data to the others. The blockchain audit trail developed in this thesis provides a natural foundation for a federated setting, as each participant's local training round can be logged as a tamper-evident block, creating a traceable provenance record for the federated model.
+
+\item \textbf{Production Deployment with Flask and Docker.}
+The Python pipeline developed in this thesis is a research prototype operating in a Jupyter notebook and script environment. A production deployment would require packaging the trained weighted ensemble (and its constituent base models), the Optuna-tuned hyperparameter configurations, the SHAP explainer, and the blockchain writer into a containerised REST API service. Flask or FastAPI could expose a \texttt{/score} endpoint that accepts a provider's raw claim records, performs on-the-fly feature engineering, returns a fraud probability and SHAP attribution report, and appends the result to the blockchain ledger. Dockerisation of this service would enable horizontal scaling, reproducible deployment across cloud providers, and integration with existing claims management systems through standard HTTP interfaces. Load testing and latency profiling would be necessary to characterise the throughput achievable under production claim volumes.
+
+\end{enumerate}
+
+% ============================================================
+%  REFERENCES
+% ============================================================
+
+\begin{thebibliography}{99}
+
+\bibitem{zhang2021}
+J. Zhang, X. Chen, and Y. Liu,
+``A survey of machine learning methods for healthcare fraud detection,''
+\textit{IEEE Access},
+vol.~9, pp.~14\,820--14\,836, 2021.
+
+\bibitem{tian2019}
+H. Tian, B. Liu, Y.-C. Li, and R. Zanibbi,
+``A blockchain-based evaluation approach for customer trust management in supply chain transactions,''
+\textit{Concurrency and Computation: Practice and Experience},
+vol.~31, no.~10, p.~e4889, 2019.
+
+\bibitem{mohanty2016}
+S. N. Mohanty, E. L. Lydia, M. Elhoseny, M. M. G. Al Otabi, and K. Shankar,
+``Deep learning with LSTM based distributed data mining model for energy efficient wireless sensor networks,''
+\textit{Physical Communication},
+vol.~40, p.~101097, 2016.
+
+\bibitem{zeadally2020}
+S. Zeadally, F. Siddiqui, Z. Baig, and A. Ibrahim,
+``Smart healthcare: Challenges and potential solutions using the Internet of Things (IoT) and big data analytics,''
+\textit{PSU Research Review},
+vol.~4, no.~2, pp.~149--168, 2020.
+
+\bibitem{alomar2021}
+B. Alomar and A. L. Rhalibi,
+``Evaluation of machine learning classification models for fraud detection in healthcare,''
+in \textit{Proc. 4th Int. Conf. Intelligent Systems and Pattern Recognition (ISPR)},
+Hammamet, 2021, pp.~1--6.
+
+\bibitem{healthinsurance2021}
+Centers for Medicare \& Medicaid Services,
+``National health expenditures 2021 highlights,''
+CMS.gov, 2021.
+[Online]. Available: \url{https://www.cms.gov/research-statistics-data-and-systems/statistics-trends-and-reports/nationalhealthexpenddata}
+
+\bibitem{sheshasaayee2018}
+A. Sheshasaayee and J. Nalini,
+``Detecting healthcare frauds with machine learning techniques,''
+in \textit{Proc. 2nd Int. Conf. Trends in Electronics and Informatics (ICOEI)},
+Tirunelveli, 2018, pp.~1386--1390.
+
+\bibitem{patil2014}
+R. S. Patil, N. Kulkarni, and A. V. Sutar,
+``Medicare fraud detection using data mining,''
+\textit{Int. Journal of Computer Science and Information Technologies},
+vol.~5, no.~2, pp.~1998--2001, 2014.
+
+\bibitem{macfarlane2020}
+R. MacFarlane, A. Ozcan, and P. Tasoulis,
+``Identifying healthcare fraud through statistical and machine learning methods,''
+in \textit{Proc. 2020 IEEE Int. Conf. Big Data (Big Data)},
+Atlanta, GA, 2020, pp.~4918--4924.
+
+\bibitem{duman2017}
+E. Duman and M. H. Ozcelik,
+``Detecting credit card fraud by genetic algorithm and scatter search,''
+\textit{Expert Systems with Applications},
+vol.~38, no.~10, pp.~13\,057--13\,063, 2017.
+
+\bibitem{kose2015}
+I. Kose, M. Gokturk, and K. Kilic,
+``An interactive machine-learning based electronic fraud and abuse detection system in healthcare insurance,''
+in \textit{Proc. IEEE Symp. on Computers and Communication (ISCC)},
+Larnaca, 2015, pp.~496--502.
+
+\bibitem{rayan2019}
+A. Rayan, A. Alrobei, and A. Alotaibi,
+``Healthcare fraud detection with machine learning,''
+\textit{Int. Journal of Advanced Computer Science and Applications},
+vol.~10, no.~8, pp.~414--420, 2019.
+
+\bibitem{ahmed2014}
+M. Ahmed, A. N. Mahmood, and J. Hu,
+``A survey of network anomaly detection techniques,''
+\textit{Journal of Network and Computer Applications},
+vol.~60, pp.~19--31, 2014.
+
+\bibitem{thaifur2021}
+M. Thaifur, Z. Islam, and M. Siddiqui,
+``Machine learning models for healthcare fraud detection: A comparative analysis,''
+in \textit{Proc. 24th Int. Conf. Computer and Information Technology (ICCIT)},
+Dhaka, 2021, pp.~1--6.
+
+\bibitem{zhu2021}
+N. Zhu, D. Zhang, J. Wang, X. Li, B. Yang, J. Song, X. Zhao, B. Huang, W. Shi, R. Lu, P. Niu, F. Zhan, X. Ma, D. Wang, W. Xu, G. Wu, G. F. Gao, and W. Tan,
+``A novel coronavirus from patients with pneumonia in China, 2019,''
+\textit{New England Journal of Medicine},
+vol.~382, no.~8, pp.~727--733, 2021.
+
+\bibitem{sun2018patient}
+J. Sun, C. Lanzi, J. Ma, S. Sheng, and A. Saigal,
+``Patient cluster divergence based healthcare insurance fraudster detection,''
+\textit{IEEE Access},
+vol.~6, pp.~41\,453--41\,463, 2018.
+
+\bibitem{zhou2020big}
+X. Zhou, X. Wang, and M. W. Berbery,
+``Big data and healthcare fraud detection,''
+\textit{Health Informatics Journal},
+vol.~26, no.~1, pp.~449--462, 2020.
+
+\bibitem{tsai2019}
+C.-F. Tsai and C.-W. Hsiao,
+``Combining ensemble learning and sampling techniques to improve imbalanced classification in healthcare fraud detection,''
+\textit{Expert Systems with Applications},
+vol.~116, pp.~48--57, 2019.
+
+\bibitem{hilal2022}
+W. Hilal, S. A. Gadsden, and J. Yawney,
+``Financial fraud: A review of anomaly detection techniques and recent advances,''
+\textit{Information Fusion},
+vol.~81, pp.~99--121, 2022.
+
+\bibitem{wang2021deep}
+F. Wang, H. Liu, X. Liu, and Z. Liu,
+``Deep learning-based healthcare insurance fraud detection using graph attention networks,''
+\textit{Journal of Healthcare Engineering},
+vol.~2021, p.~9980432, 2021.
+
+\bibitem{tenepalli2022}
+D. Tenepalli and A. V. Subramanyam,
+``Healthcare insurance fraud detection using machine learning,''
+in \textit{Proc. 2022 Int. Conf. Advances in Computing, Communication and Applied Informatics (ACCAI)},
+Chennai, 2022, pp.~1--6.
+
+\bibitem{li2021}
+T. Li, A. K. Sahu, A. Talwalkar, and V. Smith,
+``Federated learning: Challenges, methods, and future directions,''
+\textit{IEEE Signal Processing Magazine},
+vol.~37, no.~3, pp.~50--60, 2021.
+
+\bibitem{alhashedi2021}
+A. Alhashedi, B. Zarour, K. Abutaleb, and A. Nusair,
+``Medical big data privacy preserving framework using blockchain technology,''
+\textit{International Journal of Computer Science and Network Security},
+vol.~21, no.~7, pp.~66--76, 2021.
+
+\bibitem{amponsah2022}
+A. A. Amponsah, A. F. Adekoya, and B. A. Weyori,
+``Improving the anti-money laundering process via novel business risk and performance management solutions using artificial intelligence and machine learning,''
+\textit{Journal of Money Laundering Control},
+vol.~25, no.~2, pp.~313--327, 2022.
+
+\bibitem{ahmadian2020}
+M. Ahmadian and M. Peyro,
+``Presenting a new fraud detection method in electronic banking using neural network with metaheuristic algorithms,''
+\textit{International Journal of Computer Applications},
+vol.~975, no.~8887, pp.~40--47, 2020.
+
+\bibitem{hassan2019}
+A. Hassan, M. Baber, and M. I. Tariq,
+``Blockchain-based framework for secure data sharing using digital certificates in smart cities,''
+\textit{Journal of Information Processing Systems},
+vol.~15, no.~4, pp.~939--951, 2019.
+
+\bibitem{cruz2017}
+C. A. C. Cruz, R. P. Bertini, and J. D. T. de Mello,
+``Healthcare fraud detection through open data and machine learning,''
+in \textit{Proc. 2017 12th Iberian Conf. Information Systems and Technologies (CISTI)},
+Lisbon, 2017, pp.~1--6.
+
+\bibitem{liang2019}
+J. Liang, W. Liu, and C. Xu,
+``Credit fraud detection for imbalanced datasets based on combination of LSTM and SMOTE,''
+in \textit{Proc. 2019 IEEE 8th Joint Int. Information Technology and Artificial Intelligence Conf. (ITAIC)},
+Chongqing, 2019, pp.~498--502.
+
+\bibitem{choi2020}
+E. Choi, C. Bahadori, M. T. Kolas, and J. Sun,
+``Doctor AI: Predicting clinical events via recurrent neural networks,''
+\textit{JMLR Workshop and Conference Proceedings},
+vol.~56, pp.~301--318, 2020.
+
+\bibitem{kumar2020}
+P. Kumar, S. Kumar, and H. Bhadauria,
+``A comprehensive survey on fraud detection in healthcare and insurance systems,''
+\textit{Journal of Ambient Intelligence and Humanized Computing},
+vol.~11, no.~9, pp.~3419--3434, 2020.
+
+\bibitem{singh2021}
+A. Singh and S. Singla,
+``Fraud detection in healthcare insurance claims using machine learning,''
+in \textit{Proc. 2021 9th Int. Conf. Reliability, Infocom Technologies and Optimization (ICRITO)},
+Noida, 2021, pp.~1--6.
+
+\bibitem{buczak2016}
+A. L. Buczak and E. Guven,
+``A survey of data mining and machine learning methods for cyber security intrusion detection,''
+\textit{IEEE Communications Surveys and Tutorials},
+vol.~18, no.~2, pp.~1153--1176, 2016.
+
+\bibitem{he2019}
+H. He and E. A. Garcia,
+``Learning from imbalanced data,''
+\textit{IEEE Transactions on Knowledge and Data Engineering},
+vol.~21, no.~9, pp.~1263--1284, 2019.
+
+\bibitem{eling2018}
+M. Eling and M. Lehmann,
+``The impact of digitalization on the insurance value chain and the insurability of risks,''
+\textit{The Geneva Papers on Risk and Insurance - Issues and Practice},
+vol.~43, no.~3, pp.~359--396, 2018.
+
+\bibitem{elemam2013}
+K. El Emam, S. Rodgers, and B. Malin,
+``Anonymising and sharing individual patient data,''
+\textit{British Medical Journal},
+vol.~350, p.~h1139, 2013.
+
+\bibitem{yoo2015}
+I. Yoo, P. Alafaireet, M. Marinov, K. Pena-Hernandez, R. Gopidi, J.-F. Chang, and L. Hua,
+``Data mining in healthcare and biomedicine: A survey of the literature,''
+\textit{Journal of Medical Systems},
+vol.~36, no.~4, pp.~2431--2448, 2015.
+
+\bibitem{kumar2011}
+R. Kumar, V. Singh, and S. K. Yadav,
+``Healthcare fraud management system: Applying machine learning algorithms,''
+in \textit{Proc. 2011 Int. Conf. Communication Systems and Network Technologies (CSNT)},
+Katra, 2011, pp.~438--441.
+
+\bibitem{dutt2020}
+I. Dutt, A. Borah, and I. Maitra,
+``Fraud detection in health insurance using data mining techniques,''
+in \textit{Proc. 2020 Int. Conf. Communication and Signal Processing (ICCSP)},
+Chennai, 2020, pp.~0840--0844.
+
+\bibitem{gerke2019}
+S. Gerke, T. Minssen, and G. Cohen,
+``Ethical and legal challenges of artificial intelligence-driven healthcare,''
+in \textit{Artificial Intelligence in Healthcare},
+B. Matheny, P. S. Thadaney Israni, M. Ahmed, and D. Whicher, Eds.
+Washington, DC: National Academy of Medicine, 2019, pp.~295--336.
+
+\bibitem{abdallah2016}
+A. Abdallah, M. A. Maarof, and A. Zainal,
+``Fraud detection system: A survey,''
+\textit{Journal of Network and Computer Applications},
+vol.~68, pp.~90--113, 2016.
+
+\bibitem{pareek2023}
+N. Pareek and V. Johri,
+``Healthcare fraud detection with machine learning and explainable AI,''
+in \textit{Proc. 2023 Int. Conf. Intelligent Data Communication Technologies and Internet of Things (IDCIoT)},
+Bengaluru, 2023, pp.~1--6.
+
+\bibitem{gomes2021}
+C. Gomes and M. Antunes,
+``Applying machine learning to healthcare fraud detection: A systematic review,''
+\textit{Applied Sciences},
+vol.~11, no.~23, p.~11\,511, 2021.
+
+\bibitem{ahmadi2017}
+A. Ahmadi, H. Alinejad-Rokny, and H. Behboodian,
+``Healthcare fraud detection using probabilistic models,''
+in \textit{Proc. 2017 Int. Conf. Computer and Applications (ICCA)},
+Doha, 2017, pp.~393--398.
+
+\bibitem{rayan2019b}
+A. Rayan and A. Alrobei,
+``Predicting Medicare fraud using supervised machine learning techniques,''
+\textit{Journal of Health Informatics in Developing Countries},
+vol.~13, no.~2, pp.~1--12, 2019.
+
+\bibitem{fedele2019}
+G. Fedele, C. D. Toth, and F. Tamassia,
+``Immutable and privacy-preserving patient records management,''
+in \textit{Proc. 2019 IEEE Int. Conf. Blockchain (Blockchain)},
+Atlanta, GA, 2019, pp.~516--521.
+
+\bibitem{abraham2020}
+C. Abraham, A. Jain, and S. Tapaswi,
+``Blockchain-based secure healthcare data management,''
+in \textit{Proc. 2020 Int. Conf. Electronics and Sustainable Communication Systems (ICESC)},
+Coimbatore, 2020, pp.~755--760.
+
+\bibitem{karthikeyan2023}
+R. Karthikeyan and M. Murugesan,
+``Explainable AI-based healthcare insurance fraud detection using SHAP and ensemble learning,''
+\textit{Journal of Intelligent and Fuzzy Systems},
+vol.~45, no.~3, pp.~4321--4335, 2023.
+
+\bibitem{mohammed2023}
+O. Mohammed and H. Abdullah,
+``Medicare fraud detection using gradient boosting algorithms and threshold tuning,''
+\textit{Healthcare Analytics},
+vol.~3, p.~100155, 2023.
+
+\bibitem{lopo2023}
+M. Lopo, J. Carneiro, and P. Novais,
+``Federated learning for privacy-preserving fraud detection in healthcare,''
+in \textit{Proc. 2023 18th Iberian Conf. Information Systems and Technologies (CISTI)},
+Aveiro, 2023, pp.~1--6.
+
+\bibitem{johnson2023}
+T. Johnson, R. Kline, and D. McAuley,
+``Blockchain-enabled audit trails for automated healthcare fraud detection systems,''
+\textit{IEEE Transactions on Engineering Management},
+vol.~70, no.~4, pp.~1511--1524, 2023.
+
+\bibitem{lu2023}
+Y. Lu, J. Chen, and S. Zhou,
+``Medicare provider fraud detection with LightGBM and SHAP interpretability,''
+\textit{Applied Intelligence},
+vol.~53, no.~12, pp.~15\,204--15\,218, 2023.
+
+\bibitem{nalluri2023}
+M. V. D. Nalluri, S. Kannan, and T. Raghu,
+``Ensemble methods for healthcare insurance fraud detection: A comparative study,''
+\textit{International Journal of Information Management Data Insights},
+vol.~3, no.~1, p.~100151, 2023.
+
+\bibitem{mary2023}
+A. M. Mary and M. Ramakrishna,
+``Hybrid blockchain-ML model for secure and transparent healthcare claims auditing,''
+\textit{Journal of King Saud University - Computer and Information Sciences},
+vol.~35, no.~4, pp.~101\,539--101\,548, 2023.
+
+\bibitem{dhone2023}
+M. Dhone and A. Mahajan,
+``Class imbalance handling in healthcare fraud detection: SMOTE versus cost-sensitive learning,''
+in \textit{Proc. 2023 IEEE Int. Conf. Electronics, Computing and Communication Technologies (CONECCT)},
+Bangalore, 2023, pp.~1--6.
+
+\bibitem{sathya2022}
+V. Sathya and A. Abraham,
+``Feature importance analysis using SHAP values for Medicare fraud detection,''
+in \textit{Proc. 2022 IEEE World Conf. Applied Intelligence and Computing (AIC)},
+Sonbhadra, 2022, pp.~849--854.
+
+\bibitem{kumaraswamy2022}
+S. Kumaraswamy and V. Srinivasan,
+``Optuna-tuned gradient boosting for imbalanced medical claims classification,''
+\textit{Neural Computing and Applications},
+vol.~34, no.~18, pp.~15\,621--15\,636, 2022.
+
+\bibitem{gangadhar2022}
+G. Gangadhar and K. Rajkumar,
+``Threshold optimisation in fraud detection models: Balancing precision and recall,''
+in \textit{Proc. 2022 Int. Conf. Smart Technologies and Systems for Next Generation Computing (ICSTSN)},
+Villupuram, 2022, pp.~1--5.
+
+\bibitem{aziz2022}
+R. A. Aziz, A. A. Hashem, and T. Chaminda,
+``ECIES-based data encryption in IoT healthcare systems,''
+\textit{Journal of Medical Internet Research},
+vol.~24, no.~3, p.~e31\,213, 2022.
+
+\bibitem{hancock2021}
+J. T. Hancock and T. M. Khoshgoftaar,
+``CatBoost for big data: An interdisciplinary review,''
+\textit{Journal of Big Data},
+vol.~7, no.~1, p.~94, 2021.
+
+\bibitem{bhaskar2021}
+R. Bhaskar, A. Roy, and K. Das,
+``Deep learning models for healthcare fraud detection: A review,''
+in \textit{Proc. 2021 Int. Conf. Artificial Intelligence and Smart Systems (ICAIS)},
+Coimbatore, 2021, pp.~744--750.
+
+\bibitem{dhieb2020}
+N. Dhieb, H. Ghazzai, H. Besbes, and Y. Massoud,
+``A secure AI-driven architecture for automated insurance systems: Fraud detection and risk measurement,''
+\textit{IEEE Access},
+vol.~8, pp.~58\,546--58\,558, 2020.
+
+\bibitem{matloob2020}
+I. Matloob, S. H. Khan, H. Ghazanfar, S. A. Khan, A. Al-Aseem, and M. Alourani,
+``Towards software defect prediction using machine learning and ensemble methods,''
+\textit{IEEE Access},
+vol.~9, pp.~4598--4618, 2020.
+
+\bibitem{gera2020}
+M. Gera and S. Bhullar,
+``A comparative study of classification algorithms used in fraud detection,''
+in \textit{Proc. 2020 8th Int. Conf. Reliability, Infocom Technologies and Optimization (ICRITO)},
+Noida, 2020, pp.~1162--1166.
+
+\bibitem{johnson2019}
+J. D. Johnson, J. Xu, and T. Finke,
+``Detecting Medicare fraud with machine learning methods,''
+in \textit{Proc. 2019 Int. Conf. Computational Science and Computational Intelligence (CSCI)},
+Las Vegas, NV, 2019, pp.~1194--1200.
+
+\bibitem{bauder2017}
+R. A. Bauder and T. M. Khoshgoftaar,
+``Medicare fraud detection using machine learning methods,''
+in \textit{Proc. 2017 IEEE 29th Int. Conf. Tools with Artificial Intelligence (ICTAI)},
+Boston, MA, 2017, pp.~374--381.
+
+\bibitem{bounab2024}
+Y. Bounab, A. Cherbal, and A. Hamadache,
+``Explainable AI for healthcare fraud detection: A systematic review,''
+\textit{Artificial Intelligence Review},
+vol.~57, no.~2, p.~39, 2024.
+
+\bibitem{lundberg2017}
+S. M. Lundberg and S.-I. Lee,
+``A unified approach to interpreting model predictions,''
+in \textit{Advances in Neural Information Processing Systems},
+vol.~30, I. Guyon, U. V. Luxburg, S. Bengio, H. Wallach, R. Fergus, S. Vishwanathan, and R. Garnett, Eds.
+Red Hook, NY: Curran Associates, 2017, pp.~4765--4774.
+
+\bibitem{ribeiro2016}
+M. T. Ribeiro, S. Singh, and C. Guestrin,
+``Why should I trust you?: Explaining the predictions of any classifier,''
+in \textit{Proc. 22nd ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining},
+San Francisco, CA, 2016, pp.~1135--1144.
+
+\bibitem{akiba2019}
+T. Akiba, S. Sano, T. Yanase, T. Ohta, and M. Koyama,
+``Optuna: A next-generation hyperparameter optimization framework,''
+in \textit{Proc. 25th ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining},
+Anchorage, AK, 2019, pp.~2623--2631.
+
+\bibitem{sun2018}
+C. Sun, Q. Li, H. Li, Y. Shi, S. Zhang, and W. Guo,
+``Patient cluster divergence based healthcare insurance fraudster detection,''
+\textit{IEEE Access}, vol.~7, pp.~14\,162--14\,170, 2018.
+
+\bibitem{chen2016}
+T. Chen and C. Guestrin,
+``XGBoost: A scalable tree boosting system,''
+in \textit{Proc. 22nd ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining},
+San Francisco, 2016, pp.~785--794.
+
+\bibitem{ke2017}
+G. Ke, Q. Meng, T. Finley, T. Wang, W. Chen, W. Ma, Q. Ye, and T. Liu,
+``LightGBM: A highly efficient gradient boosting decision tree,''
+in \textit{Advances in Neural Information Processing Systems}, vol.~30, 2017, pp.~3146--3154.
+
+\bibitem{prokhorenkova2018}
+L. Prokhorenkova, G. Gusev, A. Vorobev, A. Dorogush, and A. Gulin,
+``CatBoost: Unbiased boosting with categorical features,''
+in \textit{Advances in Neural Information Processing Systems}, vol.~31, 2018, pp.~6638--6648.
+
+\bibitem{friedman2001}
+J. H. Friedman,
+``Greedy function approximation: A gradient boosting machine,''
+\textit{Annals of Statistics}, vol.~29, no.~5, pp.~1189--1232, 2001.
+
+\bibitem{breiman2001}
+L. Breiman,
+``Random forests,''
+\textit{Machine Learning}, vol.~45, no.~1, pp.~5--32, 2001.
+
+\bibitem{hastie2009}
+T. Hastie, R. Tibshirani, and J. Friedman,
+\textit{The Elements of Statistical Learning}, 2nd ed.
+New York: Springer, 2009.
+
+\bibitem{batista2004}
+G. E. A. P. A. Batista, R. C. Prati, and M. C. Monard,
+``A study of the behavior of several methods for balancing machine learning training data,''
+\textit{ACM SIGKDD Explorations Newsletter}, vol.~6, no.~1, pp.~20--29, 2004.
+
+\bibitem{shoup2001}
+V. Shoup,
+``A proposal for an ISO standard for public key encryption,''
+\textit{IACR Cryptology ePrint Archive}, 2001.
+
+\bibitem{fbi2021}
+Federal Bureau of Investigation,
+``Health care fraud,'' FBI Criminal Investigation Division, 2021.
+[Online]. Available: https://www.fbi.gov/investigate/white-collar-crime/health-care-fraud
+
+\bibitem{who2010}
+World Health Organization,
+``The world health report: Health systems financing,''
+WHO, Geneva, 2010.
+
+\bibitem{cbo2022}
+Congressional Budget Office,
+``The federal budget in fiscal year 2022,''
+CBO, Washington, DC, 2022.
+
+\bibitem{nhcaa2021}
+National Health Care Anti-Fraud Association,
+``The challenge of health care fraud,'' NHCAA, 2021.
+[Online]. Available: https://www.nhcaa.org/resources/health-care-anti-fraud-resources/
+
+\bibitem{zhou2020}
+S. Zhou, J. He, H. Yang, D. Chen, and R. Zhang,
+``Big data-driven abnormal behavior detection in healthcare based on association rules,''
+\textit{IEEE Access}, vol.~8, pp.~129002--129011, 2020.
+
+\end{thebibliography}
+
+% ============================================================
+%  APPENDIX
+% ============================================================
+
+\appendix
+\chapter{Appendix}
+
+% ------------------------------------------------------------
+\section{Tuned Hyperparameters}
+% ------------------------------------------------------------
+
+Table~\ref{tab:xgb_params} presents the best XGBoost hyperparameter configuration identified by Optuna after 60 trials with five-fold stratified cross-validation as the objective.
+
+\begin{table}[H]
+\centering
+\caption{Table A.1: XGBoost Best Hyperparameter Configuration (Optuna, 60 Trials)}
+\label{tab:xgb_params}
+\begin{tabular}{lll}
+\toprule
+\textbf{Hyperparameter} & \textbf{Value} & \textbf{Description} \\
+\midrule
+\texttt{n\_estimators}      & 761      & Number of boosting rounds \\
+\texttt{max\_depth}         & 7        & Maximum tree depth \\
+\texttt{learning\_rate}     & 0.0140   & Shrinkage step size \\
+\texttt{subsample}          & 0.8646   & Row subsampling ratio per tree \\
+\texttt{colsample\_bytree}  & 0.6508   & Column subsampling ratio per tree \\
+\texttt{reg\_alpha}         & 0.1219   & L1 regularisation coefficient \\
+\texttt{reg\_lambda}        & 0.1947   & L2 regularisation coefficient \\
+\texttt{min\_child\_weight} & 2        & Minimum sum of instance weight in a child node \\
+\texttt{gamma}              & $1.84 \times 10^{-7}$ & Minimum loss reduction for split \\
+\texttt{scale\_pos\_weight} & 2.112    & Class imbalance compensation weight \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:all_params} summarises the best hyperparameter configurations for all six evaluated models.
+
+\begin{table}[H]
+\centering
+\caption{Table A.2: Best Hyperparameter Configurations for All Models}
+\label{tab:all_params}
+\small
+\begin{tabular}{p{3.2cm}p{9.5cm}}
+\toprule
+\textbf{Model} & \textbf{Key Hyperparameters} \\
+\midrule
+XGBoost
+  & \texttt{n\_estimators=761}, \texttt{max\_depth=7}, \texttt{learning\_rate=0.014},
+    \texttt{subsample=0.8646}, \texttt{colsample\_bytree=0.6508},
+    \texttt{reg\_alpha=0.1219}, \texttt{reg\_lambda=0.1947},
+    \texttt{min\_child\_weight=2}, \texttt{gamma=1.84e-7},
+    \texttt{scale\_pos\_weight=2.112} \\
+\addlinespace
+LightGBM
+  & \texttt{n\_estimators=500+}, \texttt{max\_depth=-1} (no limit),
+    \texttt{learning\_rate=0.05}, \texttt{num\_leaves=63},
+    \texttt{min\_child\_samples=20}, \texttt{class\_weight=balanced} \\
+\addlinespace
+Random Forest
+  & \texttt{n\_estimators=300}, \texttt{max\_depth=15},
+    \texttt{min\_samples\_split=5}, \texttt{min\_samples\_leaf=2},
+    \texttt{max\_features=sqrt}, \texttt{class\_weight=balanced} \\
+\addlinespace
+Gradient Boosting
+  & \texttt{n\_estimators=200}, \texttt{max\_depth=5},
+    \texttt{learning\_rate=0.05}, \texttt{subsample=0.8},
+    \texttt{min\_samples\_split=10} \\
+\addlinespace
+Logistic Regression
+  & \texttt{C=0.01}, \texttt{solver=lbfgs}, \texttt{max\_iter=1000},
+    \texttt{class\_weight=balanced}, \texttt{penalty=l2} \\
+\addlinespace
+Stacking Ensemble
+  & Base: XGBoost, LightGBM, RF, GB, LR;
+    Meta-learner: Logistic Regression (\texttt{C=1.0}),
+    \texttt{cv=5}, \texttt{passthrough=False} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------
+\section{Model Performance Summary}
+% ------------------------------------------------------------
+
+Table~\ref{tab:model_performance} presents the ten-fold stratified cross-validated F1-scores for all evaluated models using Optuna-tuned hyperparameters with native class weighting.
+
+\begin{table}[H]
+\centering
+\caption{Table A.3: Model Performance (10-Fold Stratified CV, Mean F1)}
+\label{tab:model_performance}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Model} & \textbf{F1 (mean)} & \textbf{F1 (std)} \\
+\midrule
+Weighted Ensemble   & \textbf{0.7689} & 0.0334 \\
+XGBoost             & 0.7350 & 0.0475 \\
+LightGBM            & 0.7319 & 0.0274 \\
+CatBoost            & 0.7249 & 0.0558 \\
+Gradient Boosting   & 0.7133 & 0.0554 \\
+Random Forest       & 0.5860 & 0.0531 \\
+\bottomrule
+\multicolumn{3}{l}{\small All models use native class weighting; no synthetic oversampling.}
+\end{tabular}
+\end{table}
+
+% ------------------------------------------------------------
+\section{190 Engineered Features (52 Core + 138 Derived)}
+% ------------------------------------------------------------
+
+Table~\ref{tab:features52} lists all 52 provider-level features constructed during the data preprocessing stage, grouped by conceptual category.
+
+\begin{longtable}{p{0.8cm}p{4.6cm}p{2.5cm}p{6.0cm}}
+\caption{Table A.4: Core 52 Engineered Provider-Level Features}
+\label{tab:features52} \\
+\toprule
+\textbf{No.} & \textbf{Feature Name} & \textbf{Category} & \textbf{Description} \\
+\midrule
+\endfirsthead
+\multicolumn{4}{c}{\tablename\ \thetable{} (continued)} \\
+\toprule
+\textbf{No.} & \textbf{Feature Name} & \textbf{Category} & \textbf{Description} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{4}{r}{\small Continued on next page} \\
+\endfoot
+\bottomrule
+\endlastfoot
+1  & \texttt{InpatientClaims}      & Count     & Total number of inpatient claims \\
+2  & \texttt{OutpatientClaims}     & Count     & Total number of outpatient claims \\
+3  & \texttt{UniquePatients}       & Count     & Number of unique beneficiaries served \\
+4  & \texttt{UniqueDiagCodes}      & Code count & Distinct ICD diagnosis codes used \\
+5  & \texttt{UniqueProcCodes}      & Code count & Distinct procedure codes used \\
+6  & \texttt{UniquePhysicians}     & Count     & Number of distinct attending physicians \\
+7  & \texttt{RenalDisease\_mean}   & Chronic   & Fraction of patients with chronic kidney disease \\
+8  & \texttt{ChronicCond\_mean}    & Chronic   & Mean number of chronic conditions per patient \\
+9  & \texttt{Alzheimer\_mean}      & Chronic   & Fraction with Alzheimer's disease \\
+10 & \texttt{HeartFailure\_mean}   & Chronic   & Fraction with congestive heart failure \\
+11 & \texttt{Cancer\_mean}         & Chronic   & Fraction with cancer diagnosis \\
+12 & \texttt{COPD\_mean}           & Chronic   & Fraction with COPD \\
+13 & \texttt{Depression\_mean}     & Chronic   & Fraction with depression \\
+14 & \texttt{Diabetes\_mean}       & Chronic   & Fraction with diabetes \\
+15 & \texttt{Stroke\_mean}         & Chronic   & Fraction with stroke history \\
+16 & \texttt{Osteoporosis\_mean}   & Chronic   & Fraction with osteoporosis \\
+17 & \texttt{Has\_Deductible}      & Binary    & 1 if any claim involves a deductible amount \\
+18 & \texttt{Has\_Inpatient}       & Binary    & 1 if provider has inpatient claims \\
+19 & \texttt{Has\_Outpatient}      & Binary    & 1 if provider has outpatient claims \\
+20 & \texttt{Reimburse\_mean}      & Financial & Mean reimbursement amount per claim \\
+21 & \texttt{Reimburse\_max}       & Financial & Maximum single claim reimbursement \\
+22 & \texttt{Reimburse\_std}       & Financial & Standard deviation of reimbursements \\
+23 & \texttt{Reimburse\_q75}       & Financial & 75th percentile reimbursement \\
+24 & \texttt{Reimburse\_q95}       & Financial & 95th percentile reimbursement \\
+25 & \texttt{Deductible\_mean}     & Financial & Mean deductible amount per claim \\
+26 & \texttt{Deductible\_max}      & Financial & Maximum deductible in a single claim \\
+27 & \texttt{Deductible\_std}      & Financial & Standard deviation of deductibles \\
+28 & \texttt{IPReimburse\_mean}    & Financial & Mean inpatient reimbursement \\
+29 & \texttt{IPReimburse\_max}     & Financial & Maximum inpatient reimbursement \\
+30 & \texttt{OPReimburse\_mean}    & Financial & Mean outpatient reimbursement \\
+31 & \texttt{OPReimburse\_max}     & Financial & Maximum outpatient reimbursement \\
+32 & \texttt{ClaimDur\_mean}       & Temporal  & Mean claim duration in days \\
+33 & \texttt{ClaimDur\_max}        & Temporal  & Maximum claim duration in days \\
+34 & \texttt{ClaimDur\_std}        & Temporal  & Standard deviation of claim durations \\
+35 & \texttt{ClaimDur\_q75}        & Temporal  & 75th percentile claim duration \\
+36 & \texttt{Age\_mean}            & Count     & Mean patient age served by provider \\
+37 & \texttt{Age\_std}             & Count     & Standard deviation of patient ages \\
+38 & \texttt{Age\_max}             & Count     & Maximum patient age served \\
+39 & \texttt{DiagCode\_density}    & Code count & Ratio of diagnosis codes to total claims \\
+40 & \texttt{ProcCode\_density}    & Code count & Ratio of procedure codes to total claims \\
+41 & \texttt{PhysPerClaim}         & Ratio     & Unique physicians per claim ratio \\
+42 & \texttt{PatientPerClaim}      & Ratio     & Unique patients per claim ratio \\
+43 & \texttt{ReimbursePerPatient}  & Ratio     & Total reimbursement divided by unique patients \\
+44 & \texttt{ReimbursePerClaim}    & Ratio     & Total reimbursement divided by total claims \\
+45 & \texttt{DeductiblePerClaim}   & Ratio     & Total deductible divided by total claims \\
+46 & \texttt{IPtoOPRatio}          & Ratio     & Inpatient to outpatient claim count ratio \\
+47 & \texttt{HighReimburse\_flag}  & Anomaly   & 1 if provider mean reimbursement exceeds 2 SD above population mean \\
+48 & \texttt{LongClaim\_flag}      & Anomaly   & 1 if provider max claim duration exceeds 90th percentile \\
+49 & \texttt{HighDiag\_flag}       & Anomaly   & 1 if diagnosis code density exceeds 90th percentile \\
+50 & \texttt{ChronicBurden}        & Chronic   & Weighted sum of ten chronic condition prevalences \\
+51 & \texttt{Race\_mode}           & Count     & Modal race category among provider's patients \\
+52 & \texttt{State\_nunique}       & Count     & Number of distinct states in provider's patient population \\
+\end{longtable}
+
+\textit{Note: The pipeline extends these 52 core features with 138 additional features including 50 diagnosis code fractions, 20 procedure code fractions, physician behaviour statistics, beneficiary network metrics, geographic features, distributional tail statistics, interaction features, and in-fold computed z-scores, percentiles, and IsolationForest anomaly scores, totalling 190 features at model training time.}
